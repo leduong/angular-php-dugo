@@ -1,0 +1,39 @@
+<div class="classifieds">
+	<h5 class="uppercase center">Chọn nội dung hiển thị</h5>
+	<div class="column center">
+		<div class="one-half">
+			<button class="btn btn-medium" data-toggle="button">Mục rao</button>
+			<span>
+			{{classifieds.posts}} mục
+			</span>
+		</div>
+		<div class="one-half">
+			<button class="btn btn-medium active" data-toggle="button">Trao đổi</button>
+			<span>
+			{{classifieds.comments}} mục
+			</span>
+		</div>
+	</div>
+	<div class="column content" ng-repeat="classified in classifieds">
+		<div class="one-half">
+			<div class="image">
+				<img src="{{classified.img}}" alt="{{classified.title}}">
+				<div class="tags">
+					<a ng-repeat="tag in classified.tags" class="label btn-tag" href="#tag/{{tag.slug}}">{{tag.name}}</a>
+				</div>
+			</div>
+		</div>
+		<div class="one-half">
+			{{classified.text}}
+			<br>
+			<div class="center">
+				<b>{{classified.user.name}}</b>
+			</div>
+			<div class="callsms">
+				<a class="btn-call" href="tel:{{classified.user.phone}}">Gọi</a>
+				<a class="btn-sms" href="sms:{{classified.user.phone}}">Nhắn tin</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Classifieds -->

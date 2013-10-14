@@ -1,0 +1,124 @@
+<div class="search">
+	<form class="form-inline">
+		<input class="input input-xlarge" autocomplete="off" type="text" placeholder="Địa danh, chủ đề hay từ bất kỳ..." onclick="javascript:location.href='/search.html';" />
+		<div class="icon"><i class="icon-search"></i></div>
+	</form>
+</div>
+<div class="slider">
+	<div class="content">
+		<div ng-controller="CarouselCtrl">
+			<carousel interval="myInterval">
+			<slide ng-repeat="slide in slides" active="slide.active">
+			<a href="{{slide.href}}" title="{{slide.title}}"><img ng-src="{{slide.image}}" style="margin:auto;"></a>
+			</slide>
+			</carousel>
+		</div>
+	</div>
+</div>
+<!-- /Real Estate -->
+<div class="agents">
+	<div class="container">
+		<div class="column">
+			<div class="one-third">
+				<img src="uploads/media/2.jpg" class="image" alt="img">
+			</div>
+			<div class="two-third">
+				All the icons and graphics in this template are retina ready! Made to look stunning on High DPI displays!
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Agent -->
+<div class="notice">
+	<div class="container">
+		All the icons and graphics in this template are retina ready! Made to look stunning on High DPI displays!
+	</div>
+</div>
+<!-- /Notice -->
+<div class="follows">
+	<div class="container">
+		<h5 class="uppercase">Bạn đang theo dõi</h5>
+		<div class="content">
+			<div>
+				<h5>Tỉnh thành</h5>
+				<p>
+				<a class="btn btn-tag" href="/tag/hcm" title="Hồ Chí Minh">Hồ Chí Minh</a>
+				<a class="btn btn-tag" href="/tag/da-nang" title="Đà Nẵng">Đà Nẵng</a>
+				<a class="btn btn-tag" href="/tag/ha-noi" title="Hà Nội">Hà Nội</a>
+				<a class="btn btn-tag" href="/tag/ha-noi" title="Hài Phòng">Hai Phòng</a>
+				<a class="btn btn-tag" href="/tag/ha-noi" title="Cần Thơ">Cần Thơ</a>
+				</p>
+			</div>
+			<div>
+				<h5>Địa danh</h5>
+				<p>
+				<a class="btn btn-tag" href="/tag/hcm" title="Hồ Chí Minh">Hồ Chí Minh</a>
+				<a class="btn btn-tag" href="/tag/da-nang" title="Đà Nẵng">Đà Nẵng</a>
+				<a class="btn btn-tag" href="/tag/ha-noi" title="Hà Nội">Hà Nội</a>
+				</p>
+			</div>
+			<div>
+				<h5>Chủ đề</h5>
+				<p>
+				<a class="btn btn-tag" href="/tag/hcm" title="Hồ Chí Minh">Hồ Chí Minh</a>
+				<a class="btn btn-tag" href="/tag/da-nang" title="Đà Nẵng">Đà Nẵng</a>
+				<a class="btn btn-tag" href="/tag/ha-noi" title="Hà Nội">Hà Nội</a>
+				</p>
+			</div>
+			<div>
+				<h5>Nhà môi giới</h5>
+				<p>
+				<a class="btn btn-tag" href="/tag/hcm" title="Hồ Chí Minh">Nguyễn Văn A</a>
+				<a class="btn btn-tag" href="/tag/da-nang" title="Đà Nẵng">Trần Văn B</a>
+				<a class="btn btn-tag" href="/tag/ha-noi" title="Hà Nội">Phan Văn C</a>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Follows -->
+<div class="classifieds" ng-controller="ClassifiedCtrl">
+	<h5 class="uppercase center">Chọn nội dung hiển thị</h5>
+	<div class="column center">
+		<div class="one-half">
+			<button class="btn btn-medium" data-toggle="button">Mục rao</button>
+			<span>
+			123 mục
+			</span>
+		</div>
+		<div class="one-half">
+			<button class="btn btn-medium active" data-toggle="button">Trao đổi</button>
+			<span>
+			345 mục
+			</span>
+		</div>
+	</div>
+	<div infinite-scroll='results.nextPage()' infinite-scroll-disabled='results.busy' infinite-scroll-distance='1'>
+		<div class="column content" ng-repeat="classified in results.items">
+			<div class="one-half">
+				<div class="image">
+					<a href=""><img ng-src="{{classified.img}}" alt="{{classified.title}}"></a>
+					<div class="tags">
+						<a ng-repeat="(tag,name) in classified.tag" class="label btn-tag" href="/tag/{{tag}}.html">{{name| characters:12 :true}}</a>
+					</div>
+				</div>
+			</div>
+			<div class="one-half">
+				<p>{{classified.text | characters:300 :true}}</p>
+				<div class="info">
+					<div class="address"></div>
+					<div class="agent">
+						<b>{{classified.user.name}}</b>
+					</div>
+					<div class="callsms">
+						<a class="btn-call" href="tel:{{classified.user.phone}}">Gọi</a>
+						<a class="btn-sms" href="sms:{{classified.user.phone}}">Nhắn tin</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="loading" ng-show='results.busy'></div>
+		<div class="center" ng-show='results.end'>Không tìm thấy kết quả nào khác nữa</div>
+	</div>
+</div>
+<!-- /Classifieds -->

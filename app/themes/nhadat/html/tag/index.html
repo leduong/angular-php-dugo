@@ -1,0 +1,109 @@
+<div ng-controller="TypeaheadCtrl">
+	<div class="search">
+		<form class="form-inline" ng-submit="search()">
+			<input class="input input-xlarge" autocomplete="off" type="text" placeholder="Địa danh, chủ đề hay từ bất kỳ..." ng-model="keyword" typeahead="v for v in suggests($viewValue) | filter:$viewValue | limitTo:8" require />
+			<div class="icon"><i class="icon-search"></i></div>
+		</form>
+	</div>
+	<div ng-model="results">
+		<div class="classifieds">
+			<div class="column content" ng-repeat="classified in results">
+				<div class="one-half">
+					<div class="image">
+						<img ng-src="{{classified.img}}" alt="{{classified.title}}">
+						<div class="tags">
+							<a class="label btn-tag" href="/tag/{{classified.tag.slug}}">{{classified.tag.name}}</a>
+						</div>
+					</div>
+				</div>
+				<div class="one-half">
+					{{classified.text}}
+					<br>
+					<div class="center">
+						<b>{{classified.user.name}}</b>
+					</div>
+					<div class="callsms">
+						<a class="btn-call" href="tel:{{classified.user.phone}}">Gọi</a>
+						<a class="btn-sms" href="sms:{{classified.user.phone}}">Nhắn tin</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="slider">
+	<div class="slide">
+		<div ng-controller="CarouselCtrl">
+			<carousel interval="myInterval">
+			<slide ng-repeat="slide in slides" active="slide.active">
+			<img ng-src="{{slide.image}}" style="margin:auto;">
+			</slide>
+			</carousel>
+		</div>
+	</div>
+	<div class="justify">
+		Khu đô thị Phú Mỹ Hưng là một khu đô thị thuộc Quận 7, toạ lạc ở phía Nam Thành phố Hồ Chí Minh. Đây là nơi tập trung sinh sống của những người có thu nhập cao, do Công ty TNHH Liên doanh Phú Mỹ Hưng quản lý. Dự định của các nhà đầu tư nước ngoài là biến khu đầm lầy thành một khu đô thị đa chức năng kiểu mẫu, là một trung tâm tài chính, thương mại, dịch vụ, công nghiệp, khoa học, văn hóa, giáo dục, cư trú, giải trí...
+	</div>
+	<div class="follows">
+		<a class="btn btn-tag" href="/tag/hcm.html" title="Hồ Chí Minh">Hồ Chí Minh</a>
+		<a class="btn btn-tag" href="/tag/da-nang.html" title="Đà Nẵng">Đà Nẵng</a>
+		<a class="btn btn-tag" href="/tag/ha-noi.html" title="Hà Nội">Hà Nội</a>
+		<a class="btn btn-tag" href="/tag/ha-noi.html" title="Hài Phòng">Hai Phòng</a>
+		<a class="btn btn-tag" href="/tag/ha-noi.html" title="Cần Thơ">Cần Thơ</a>
+	</div>
+	<div id="gmap">
+		<iframe class="image" src="https://maps.google.com/?ie=UTF8&amp;ll=10.823099,106.629664&amp;spn=7.546691,79.013672&amp;t=m&amp;z=14&amp;output=embed" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" width="635" height="300"></iframe>
+	</div>
+	<div class="clearfix"></div>
+</div>
+<div class="agents">
+	<div class="container">
+		<div class="column">
+			<div class="one-third">
+				<img src="/uploads/media/4.jpg" class="image" alt="img">
+			</div>
+			<div class="two-third">
+				<div class="name">
+					Hung, Phu My Hung
+				</div>
+				<div class="info">
+					<div class="rate pull-left" ng-controller="RatingCtrl">
+						<rating value="rate" max="max" readonly="isReadonly" on-hover="hoveringOver(value)" on-leave="overStar = null"></rating>
+					</div>
+					<div class="comments pull-left">123 nhận xét</div>
+				</div>
+				<div class="callsms">
+					<a class="btn-call" href="tel:+84935773935">Gọi</a>
+					<a class="btn-sms" href="sms:+84935773935">Nhắn tin</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Agent -->
+<div class="comments">
+	<h4><b>123</b> trao đổi</h4>
+	<div class="content">
+		<div class="comment">
+			<h3>Tien Nguyen A</h3>
+			<p>Tôi định mua đất phân lô do công ty A phân phối. Mỗi lô đất có diện tích hơn 50m2, chiều ngang mặt tiền hơn 3m. Theo công ty A diện tích đất này đủ điều kiện phân lô.</p>
+			<small class="datetime">
+			<span class="location">TP. HCM</span>
+			<span class="time">27-09-2013</span>
+			</small>
+		</div>
+		<div class="comment">
+			<h3>Tien Nguyen B</h3>
+			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+			tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+			quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+			consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+			cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+			proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			<small class="datetime">
+			<span class="location">TP. HCM</span>
+			<span class="time">27-09-2013</span>
+			</small>
+		</div>
+	</div>
+</div>

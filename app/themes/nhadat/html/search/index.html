@@ -1,0 +1,37 @@
+<div ng-controller="TypeaheadCtrl">
+	<div class="search">
+		<form class="form-inline">
+			<input ng-change="search()" class="input input-xlarge" autocomplete="off" type="text" placeholder="Địa danh, chủ đề hay từ bất kỳ..." ng-model="keyword" typeahead="v for v in suggests($viewValue) | filter:$viewValue | limitTo:8" require />
+			<div class="icon"><i class="icon-search"></i></div>
+		</form>
+	</div>
+	<div infinite-scroll='results.nextPage()' infinite-scroll-disabled='results.busy' infinite-scroll-distance='1'>
+		<div class="classifieds">
+			<div class="column content" ng-repeat="classified in results">
+				<div class="one-half">
+					<div class="image">
+						<img src="{{classified.img}}" alt="{{classified.title}}">
+						<div class="tags">
+							<a ng-repeat="tag in classified.tag" class="label btn-tag" href="/tag/{{tag}}.html">{{tag| characters:12 :true}}</a>
+						</div>
+					</div>
+				</div>
+				<div class="one-half">
+					<p>{{classified.text | characters:300 :true}}</p>
+					<div class="info">
+						<div class="address"></div>
+						<div class="agent">
+							<b>{{classified.user.name}}</b>
+						</div>
+						<div class="callsms">
+							<a class="btn-call" href="tel:{{classified.user.phone}}">Gọi</a>
+							<a class="btn-sms" href="sms:{{classified.user.phone}}">Nhắn tin</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="loading" ng-show='results.busy'></div>
+	</div>
+	<!-- /Search -->
+</div>

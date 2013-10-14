@@ -1,0 +1,14 @@
+<div class="follows">
+	<div class="container">
+		<h5 class="uppercase">Bạn đang theo dõi</h5>
+		<div class="content">
+			<div ng-repeat="follow in follows">
+				<h5>{{follow.category}}</h5>
+				<p>
+					<a ng-repeat="tag in follow.tags" class="btn btn-tag" href="#tag/{{tag.slug}}" title="{{tag.name}}">{{tag.name}}</a>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Follows -->

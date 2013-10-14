@@ -1,0 +1,17 @@
+@media all and (-webkit-min-device-pixel-ratio:2) {
+	.nav-menu, .nav-search, .nav-sale, .nav-msg {
+		background-image:url(../img/nhadat@2x.png);
+		-webkit-background-size:180px 90px;
+	}
+	.btn-call, .btn-sms{
+		background-image:url(../img/callsms@2x.png);
+		-webkit-background-size:28px 60px;
+	}
+	.search{
+		background-image:url(../img/top@2x.png);
+	}
+	.i-email, .i-go{
+		background-image:url(../img/icon@2x.png);
+		-webkit-background-size:120px 240px;
+	}
+}
