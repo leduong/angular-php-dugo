@@ -5,11 +5,6 @@
 // Demonstrate how to register services
 // In this case it is a simple value service.
 var services = angular.module('app.services', [])
-	.factory('App', function() {
-		return {
-			isMenu: false
-		};
-	})
 	.factory('SearchService', function($http) {
 		var SearchService = function() {
 			this.items = [];
@@ -37,11 +32,6 @@ var services = angular.module('app.services', [])
 		};
 		return SearchService;
 	})
-	.factory('Menu', function() {
-		return {
-			message: "I'm data from a service"
-		};
-	})
 	.factory("FlashService", function($rootScope) {
 		return {
 			show: function(message) {
@@ -51,6 +41,9 @@ var services = angular.module('app.services', [])
 				$rootScope.flash = "";
 			}
 		}
+	})
+	.factory("Data", function($rootScope) {
+		return {isMenu: $rootScope.isMenu}
 	})
 	.factory("SessionService", function() {
 		return {

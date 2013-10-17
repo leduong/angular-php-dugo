@@ -1,0 +1,6 @@
+RewriteEngine on
+RewriteBase /app/
+RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteCond %{HTTP:X-Requested-With} !=XMLHttpRequest
+RewriteCond %{REQUEST_URI} !^/(.*)\.(gif|jpe?g|png|js|css|swf|ico|txt|pdf|xml)
+RewriteRule ^(.*)$ app.php/$1 [QSA,L]

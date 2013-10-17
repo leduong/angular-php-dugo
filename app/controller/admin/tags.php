@@ -12,7 +12,7 @@ class Controller_Admin_Tags extends Controller
 		$selected = post('selected');
 
 		if (isset($selected)) foreach($selected as $s){
-			$c = new Model_tags($s);
+			$c = new Model_Tags($s);
 			$c->delete();
 		}
 
@@ -23,10 +23,10 @@ class Controller_Admin_Tags extends Controller
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
-		$limit=25;
+		$limit=$this->appsite['limit_per_page'];
 		$page=((int)get('page')>1)?(int)get('page'):1;
 		$offset=$limit*($page-1);
-		$total = Model_tags::count();
+		$total = Model_Tags::count();
 
 		$this->content = new View('tags');
 		$this->content->message = $this->content->form = NULL;
@@ -42,7 +42,7 @@ class Controller_Admin_Tags extends Controller
 		$pagination->attributes = array(
 			'class' => 'dataTables_paginate paging_bootstrap pagination');
 
-		$this->content->tags = Model_tags::fetch(
+		$this->content->tags = Model_Tags::fetch(
 			NULL,
 			$limit,
 			$offset,
@@ -62,7 +62,7 @@ class Controller_Admin_Tags extends Controller
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
-			$c = new Model_tags();
+			$c = new Model_Tags();
 			$c->name = post('name');
 			$c->slug = string::sanitize_url(post('name'));
 			$c->time = date('Y/m/d H:i:s');
@@ -91,7 +91,7 @@ class Controller_Admin_Tags extends Controller
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
-			$c = new Model_tags(post('key'));
+			$c = new Model_Tags(post('key'));
 			$c->name = post('name');
 			$c->slug = string::sanitize_url(post('name'));
 			$c->time = date('Y/m/d H:i:s');
@@ -100,7 +100,7 @@ class Controller_Admin_Tags extends Controller
 			$this->content->message = lang('success');
 		}
 
-		$c = new Model_tags(get('edit'));
+		$c = new Model_Tags(get('edit'));
 
 		$fields = array(
 			'key' => array('type' => 'hidden', 'value' => $c->id),

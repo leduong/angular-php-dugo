@@ -10,8 +10,13 @@
 	.search{
 		background-image:url(../img/top@2x.png);
 	}
-	.i-email, .i-go{
+	.i-email, .i-go, .price{
 		background-image:url(../img/icon@2x.png);
 		-webkit-background-size:120px 240px;
+	}
+	.search .icon {
+		position: absolute;
+		top: 11px;
+		left: 15px;
 	}
 }

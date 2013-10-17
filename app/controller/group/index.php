@@ -25,22 +25,18 @@
  *
  * @package Controller_Welcome_Index
  * @author [author] <[email]>
- * @filename {{app}}/controller/welcome/index.php
- * @template {{app}}/view/welcome/index.php
+ * @filename {{app}}/controller/group/index.php
+ * @template {{app}}/view/group/index.php
  **/
 
-class Controller_Welcome_Index extends Controller
+class Controller_Group_Index extends Controller
 {
   public function index()
   {
-  	if(AJAX_REQUEST){
-    	$tpl = new Template('welcome/index');
-      echo $tpl->make();
-      exit;
-  	}
-  	else $this->content = new View('welcome/index');
-  }
-  public function slides(){
-  	
+		if(AJAX_REQUEST){
+			$tpl = new Template("tag/index");
+			echo $tpl->make();
+			exit;
+		} else $this->content = '';
   }
 } // END class

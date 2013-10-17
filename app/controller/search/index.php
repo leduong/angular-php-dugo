@@ -57,15 +57,19 @@ class Controller_Search_Index extends Controller
 						foreach ($f->occurrence() as $o) {
 							$m = new Model_Messages($o->msg_id);
 							$u = new Model_User($m->uid);
-							$tag=array();
+							$tag = $meta = array();
 							foreach (array_slice(explode(',',$m->tag),0,2) as $v) {
 								$tag[string::slug($v)] = trim($v);
+							}
+							if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
+								$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
 							}
 							$array[]= array(
 								'title' => $f->name,
 								'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=320&h=320&t=m&src='.$m->value:'/uploads/media/3.jpg',
 								'tag' => $tag,
-								'text' => $m->message,
+								'meta' => $meta,
+								'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
 								'user' => array(
 									'name' => $u->first_name." ".$u->last_name,
 									'phone' => $u->phone,
@@ -88,23 +92,27 @@ class Controller_Search_Index extends Controller
 	}
 	public function show(){
 		$callback = get('jsonp');
-		$limit=10;
-		$page=((int)get('page')>1)?(int)get('page'):1;
-		$offset=$limit*($page-1);
+		$limit    =10;
+		$page     =((int)get('page')>1)?(int)get('page'):1;
+		$offset   =$limit*($page-1);
 
 		$array = array();
 		if ($fetch=Model_Messages::fetch(array(),$limit,$offset,array('id' => 'DESC'))){
 			foreach ($fetch as $m) {
 				$u = new Model_User($m->uid);
-				$tag=array();
+				$tag = $meta = array();
 				foreach (array_slice(explode(',',$m->tag),0,2) as $v) {
 					$tag[string::slug($v)] = trim($v);
+				}
+				if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
+					$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
 				}
 				$array[]= array(
 					'title' => '',
 					'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=320&h=320&t=m&src='.$m->value:'/uploads/media/3.jpg',
 					'tag' => $tag,
-					'text' => $m->message,
+					'meta' => $meta,
+					'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
 					'user' => array(
 						'name' => $u->first_name." ".$u->last_name,
 						'phone' => $u->phone,
@@ -174,25 +182,36 @@ class Controller_Search_Index extends Controller
 			exit();
 		}
 	}
-	public function onload(){
+	public function slider(){
+		$limit    =10;
+		$page     =((int)get('page')>1)?(int)get('page'):1;
+		$offset   =$limit*($page-1);
+
 		$array = array();
-		$fetch = Model_Zipcode::fetch(array("slug =''"));
-		if ($fetch){
-			foreach ($fetch as $f) {
-				$slug = string::slug($f->name);
-				if(($substr=substr($slug,0,2))&& in_array($substr,array('p-','x-','h-'))){
-					$slug = substr($slug,2,strlen($slug));
+		if ($fetch=Model_Messages::fetch(array(),$limit,$offset,array('id' => 'DESC'))){
+			foreach ($fetch as $m) {
+				$u = new Model_User($m->uid);
+				$tag = $meta = array();
+				foreach (array_slice(explode(',',$m->tag),0,2) as $v) {
+					$tag[string::slug($v)] = trim($v);
 				}
-				////$city = new Model_City($f->city_id);
-				//$district = new Model_District($f->district_id);
-				//$array[]=$f->name.", ".$district->name.", ".$city->name;
-				$f->slug = $slug;
-				$f->save();
-				echo $f->name."($slug)...Ok\n";
-				# code...
+				if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
+					$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
+				}
+				$array[]= array(
+					'title' => '',
+					'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=650&h=650&t=m&src='.$m->value:'/uploads/media/3.jpg',
+					'tag' => $tag,
+					'meta' => $meta,
+					'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
+					'user' => array(
+						'name' => $u->first_name." ".$u->last_name,
+						'phone' => $u->phone,
+						),
+				);
 			}
 		}
 		Response::json($array);
-		exit();
+		exit;
 	}
 } // END class

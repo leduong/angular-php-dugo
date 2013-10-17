@@ -27,6 +27,17 @@ angular.module('app.directives', [])
 			templateUrl: "flash.html"
 		}
 	})
+	.directive('mainpage', function($rootScope) {
+		return {
+			restrict: "E",
+			template: '<div id="mainpage" ng-view></div>',
+			link: function(scope, elem, attrs) {
+				elem.bind('click', function() {
+					$rootScope.isMenu = false;
+				});
+			}
+		}
+	})
 	.directive('infiniteScroll', ['$rootScope', '$window', '$timeout',
 		function($rootScope, $window, $timeout) {
 			return {

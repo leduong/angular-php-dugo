@@ -24,11 +24,11 @@ class Controller_Admin_User extends Controller
 		$page=((int)get('page')>1)?(int)get('page'):1;
 		$offset=$limit*($page-1);
 		$total = Model_User::count();
-		
+
 		$this->content = new View('user');
 		$this->content->message = $this->content->form = NULL;
 		$this->content->page = $page;
-		
+
 		$pagination = new Pagination($total,HTTP_SERVER."/admin/user/lists/page/[[page]].html",$page,$limit, true);
 		$pagination->attributes = array(
 			'class' => 'dataTables_paginate paging_bootstrap pagination'
@@ -53,9 +53,9 @@ class Controller_Admin_User extends Controller
 			'website' => array('div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('register'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
-		
+
 		$validation = new Validation();
-		
+
 		if($validation->run($rules)){
 			$find = array('username' => post('email'));
 			$find = array('email' => post('email'));
@@ -71,13 +71,13 @@ class Controller_Admin_User extends Controller
 				$u->last_name = post('last_name');
 				$u->phone = post('phone');
 				$u->website = post('website');
-		
+
 				$u->save();
 				$this->content->message = lang('successfully_registered');
 				$this->content->form = NULL;
 				/*
 				$message = sprintf(lang('mail_registered'), post('full_name'), post('email'), post('password'), DOMAIN);
-				$mail = new Mail();			
+				$mail = new Mail();
 				$mail->setTo(post('email'));
 				$mail->setFrom($this->appsite['email']);
 				$mail->setSender(sprintf('Website %s', DOMAIN));
@@ -90,7 +90,7 @@ class Controller_Admin_User extends Controller
 		}
 		else
 		{
-			
+
 		}
 		$form = new Form($validation, array('id' => 'register', 'enctype' => 'multipart/form-data', 'class' => 'form-horizontal'));
 		$form->fields($fields);
@@ -104,7 +104,7 @@ class Controller_Admin_User extends Controller
 		$rules = array(
 			'email' => 'required|valid_email|max_length[128]'
 		);
-		
+
 		$validation = new Validation();
 
 		if($validation->run($rules)){
@@ -116,13 +116,13 @@ class Controller_Admin_User extends Controller
 			$u->last_name = post('last_name');
 			$u->phone = post('phone');
 			$u->website = post('website');
-			
+
 			$u->save();
 			$this->content->message = lang('successfully_update');
 			$this->content->form = NULL;
 			/*
 			$message = sprintf(lang('mail_registered'), post('full_name'), post('email'), post('password'), DOMAIN);
-			$mail = new Mail();			
+			$mail = new Mail();
 			$mail->setTo(post('email'));
 			$mail->setFrom($this->appsite['email']);
 			$mail->setSender(sprintf('Website %s', DOMAIN));
@@ -144,7 +144,7 @@ class Controller_Admin_User extends Controller
 			'website' => array('value' => $c->website, 'div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
-			
+
 		$form = new Form($validation, array('id' => 'register', 'enctype' => 'multipart/form-data', 'class' => 'form-horizontal'));
 		$form->fields($fields);
 		$this->content->form = $form;

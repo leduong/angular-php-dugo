@@ -113,6 +113,7 @@ hr {
 .slider,.classifieds,.agents,.notice,.follows {
 	margin-bottom: 10px;
 	padding:0;
+	font-size: 10pt;
 }
 
 .error-flash {
@@ -121,7 +122,12 @@ hr {
 .center {
 	text-align: center;
 }
-
+.left{
+	text-align: left
+}
+.right{
+	text-align: right
+}
 .justify {
 	margin: 5px 0;
 	text-align: justify;
@@ -172,10 +178,10 @@ hr {
 }
 
 .follows .container {
-	
+
 }
 .follows .container .content {
-	
+
 	background-color: #fff;
 	-webkit-box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
 	box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
@@ -232,6 +238,18 @@ hr {
 	padding-top: 5px;
 }
 
+.one-four {
+	float: left;
+	width: 24%;
+	margin-left: 1%;
+	margin-right: 1%;
+}
+.third-four {
+	float: left;
+	width: 72%;
+	margin-left: 1%;
+	margin-right: 1%;
+}
 .one-third {
 	float: left;
 	width: 32%;
@@ -283,21 +301,7 @@ hr {
 }
 
 /* Button */
-.classifieds .info{
-	position: absolute;
-	z-index: 8;
-	left:0;
-	bottom:0px;
-	background-color: #ffffff;
-	width:100%;
-	text-align: center;
-}
-.classifieds .address{
-	margin-bottom: 5px
-}
-.classifieds .agent{
-	margin-bottom: 5px
-}
+
 .callsms {
 	padding-bottom: 10px
 }
@@ -311,12 +315,12 @@ hr {
 .btn-call, .btn-sms {
 	background: transparent url(../img/callsms.png) 0 0 no-repeat;
 	height: 28px;
-	padding: 3px 0 14px 32px;
+	padding: 5px 0 12px 32px;
 }
 
 .btn-sms {
 	margin-left: 10px;
-	background-position: 0 -33px;
+	background-position: 0 -32px;
 }
 
 .btn-tag {
@@ -512,8 +516,24 @@ li.active .nav-sale {
 	display: inline-block;
 }
 
-.i-email,.i-go {
-	background: transparent url(../img/icon.png) top left no-repeat;
+.carousel-control{position:absolute;top:40%;left:15px;width:40px;height:40px;margin-top:-20px;font-size:60px;font-weight:100;line-height:30px;color:#ffffff;text-align:center;background:#222222;border:3px solid #ffffff;-webkit-border-radius:23px;-moz-border-radius:23px;border-radius:23px;opacity:0.2;filter:alpha(opacity=20);}
+.carousel-control.right{left:auto;right:15px;}
+
+
+.i-email, .i-go, .price {
+	background-image: url(../img/icon.png);
+	background-repeat: no-repeat;
+}
+
+
+.price {
+	position: absolute;
+	top: 5px;
+	right: 0;
+	padding: 3px 5px 5px 15px;
+	color:#ffffff;
+	font-size: 10pt;
+	background-position: 0 -218px;
 }
 
 .i-email {
@@ -562,14 +582,13 @@ li.active .nav-sale {
 /* Tags */
 .tags {
 	position: absolute;
-	bottom: 3px;
-	left: 3px;
-	text-align: center;
+	bottom: 5px;
+	left: 5px;
 }
 
 .tags .btn-tag {
 	border: 1px solid transparent;
-	background-color: rgba(0, 0, 0, 0.5);
+	background-color: rgba(0, 0, 0, 0.45);
 	background-image: none;
 	color: #ffffff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.75);
@@ -584,13 +603,33 @@ li.active .nav-sale {
 }
 
 /* Classifieds */
+.classifieds .info{
+	position: absolute;
+	z-index: 8;
+	left:0;
+	bottom:0px;
+	background-color: #ffffff;
+	width:100%;
+	text-align: center;
+}
+.classifieds .address{
+	margin-bottom: 5px;
+	padding-top: 10px;
+	font-size: 9pt;
+}
+.classifieds .agent{
+	margin-bottom: 5px
+}
+
 .classifieds .column {
 	margin-bottom: 10px;
 }
 
 .classifieds p {
 	z-index: 100;
-	min-height: 140px
+	min-height: 140px;
+	margin-top: 5px;
+	font-size: 10pt;
 }
 
 .classifieds .center .one-half {
@@ -659,8 +698,8 @@ li.active .nav-sale {
 
 .search .icon {
 	position: absolute;
-	top: 12px;
-	left: 12px;
+	top: 14px;
+	left: 16px;
 }
 
 /* Agents */
@@ -757,4 +796,118 @@ form.sale {
 .loading{
 	background: transparent url('../img/preloader.gif') center center no-repeat;
 	padding:15px 0;
+}
+
+/* Messages */
+.messages {
+	margin: 5px;
+	padding: 0;
+}
+
+.messages .content {
+	border: 1px solid #d4d4d4;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+.messages .content .message{
+	margin: 5px 5px 5px 60px;
+}
+.messages .msg {
+	clear: both;
+	color: #666;
+	padding: 0 5px 5px 5px;
+	height:55px;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.messages .chat .message{
+	margin: 5px 5px 5px 28px;
+}
+
+.messages .chat {
+	clear: both;
+	margin-bottom:5px;
+}
+.messages .chat img {
+	height:24px;
+	width:24px;
+	margin:5px 0 0 5px;
+}
+
+.messages .chat .popover {
+	position: relative;
+	display: block;
+	margin-left: 48px;
+	margin-right: 48px;
+	top: none;
+	left: none;
+}
+
+.messages .chat .popover.right .arrow {
+	top: 20px;
+	left: -11px;
+	margin-top: -11px;
+	border-left-width: 0;
+	border-right-color: #999;
+	border-right-color: rgba(0, 0, 0, 0.25);
+}
+
+.popover.right .arrow:after {
+	left: 1px;
+	bottom: -10px;
+	border-left-width: 0;
+	border-right-color: #ffffff;
+}
+
+.messages .chat .popover.left .arrow {
+	top: 20px;
+	right: -11px;
+	margin-top: -11px;
+	border-right-width: 0;
+	border-left-color: #999;
+	border-left-color: rgba(0, 0, 0, 0.25);
+}
+
+.popover.left .arrow:after {
+	right: 1px;
+	border-right-width: 0;
+	border-left-color: #ffffff;
+	bottom: -10px;
+}
+
+.messages .chat .popover.left .popover-content {
+	background-color: #f1f2f3;
+}
+
+
+.messages .msg img {
+	height:48px;
+	width:48px;
+	margin:5px 0 0 5px;
+}
+
+.messages .msg:last-child {
+	border-bottom: none;
+}
+
+.messages p {
+	padding: 0;
+	margin: 0;
+}
+
+.messages h3 {
+	color: #666;
+	margin: 0 0 -10px 0;
+	padding: 0;
+}
+
+.messages .datetime {
+	color: #666;
+}
+
+.messages .datetime span:after{
+	content:", ";margin-right: 0;
+}
+.messages .datetime span:last-child:after{
+	content:"";
 }

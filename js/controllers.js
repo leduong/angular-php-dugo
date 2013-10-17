@@ -16,13 +16,48 @@ angular.module('app.controllers', [])
 		};
 	})
 	.controller("RegisterCtrl", function($scope, $location) {
-		$scope.register = function() {
-			AuthenticationService.login($scope.credentials).success(function() {
-				$location.path('/timeline.html');
+		$scope.lastForm = {};
+		$scope.register = function(form) {
+			$scope.lastForm = angular.copy(form);
+			$http({
+				method: 'POST',
+				url: "auth/register.html",
+				data: {
+					'fullname': $scope.form.fullname,
+					'email': $scope.form.email,
+					'phone': $scope.form.phone
+				},
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			}).success(function(data, status, headers, config) {
+				$scope.result = data;
+				console.log("Message sent successfully. We'll get in touch with you soon.");
+
+			}).error(function(data, status, headers, config) {
+				$scope.result = data;
+				console.log("Sending message failed.");
 			});
-		};
+		}
+		$scope.reset = function() {
+			$scope.form = angular.copy($scope.lastForm);
+		}
 	})
 	.controller("TimelineCtrl", function($scope) {})
+	.controller('MessageCtrl', function($scope) {
+		var messages = $scope.messages = [];
+		$scope.addMessage = function(avatar, name, message, sent) {
+			messages.push({
+				name: name,
+				avatar: avatar,
+				message: message,
+				sent: sent
+			});
+		};
+		$scope.addMessage('/uploads/media/4.jpg', 'Tung PMH', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', true);
+		$scope.addMessage('/uploads/media/4.jpg', 'Tung PMH', 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.', false);
+		$scope.addMessage('/uploads/media/4.jpg', 'Tung PMH', 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.', true);
+	})
 	.controller("SaleCtrl", function($scope, $timeout, $log, $http) {
 		$scope.steps = ['one', 'two', 'three', 'four', 'five'];
 		$scope.step = 0;
@@ -105,8 +140,9 @@ angular.module('app.controllers', [])
 			});
 		};
 	})
-	.controller("MessageCtrl", function($scope) {})
 	.controller("WelcomeCtrl", function($scope, $location) {})
+	.controller("TopicCtrl", function($scope, $location) {})
+	.controller("GroupCtrl", function($scope, $location) {})
 	.controller("AlertCtrl", function($scope) {
 		$scope.alerts = [];
 		$scope.addAlert = function(alert) {
@@ -161,19 +197,11 @@ angular.module('app.controllers', [])
 			$scope.isReadonly = false;
 		}
 	])
-	.controller('CarouselCtrl', function($scope) {
-		$scope.myInterval = 5000;
-		var slides = $scope.slides = [];
-		$scope.addSlide = function(img, title, link) {
-			slides.push({
-				title: title,
-				image: img,
-				href: link
-			});
-		};
-		$scope.addSlide('/uploads/covers/1.jpg', 'image 1', 'tag/ha-noi');
-		$scope.addSlide('/uploads/covers/2.jpg', 'image 2', 'tag/phu-my-hung');
-		$scope.addSlide('/uploads/covers/3.jpg', 'image 3', 'tag/ho-chi-minh');
+	.controller('CarouselCtrl', function($scope, $http) {
+		$scope.myInterval = 60000;
+		$http.post('/search/slider.html').success(function(data) {
+			$scope.slides = data;
+		})
 	});
 
 
