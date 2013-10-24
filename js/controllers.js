@@ -23,9 +23,9 @@ angular.module('app.controllers', [])
 				method: 'POST',
 				url: "auth/register.html",
 				data: {
-					'fullname': $scope.form.fullname,
-					'email': $scope.form.email,
-					'phone': $scope.form.phone
+					'fullname': $scope.form.fullname || '',
+					'email': $scope.form.email || '',
+					'phone': $scope.form.phone || '',
 				},
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded'
@@ -33,7 +33,6 @@ angular.module('app.controllers', [])
 			}).success(function(data, status, headers, config) {
 				$scope.result = data;
 				console.log("Message sent successfully. We'll get in touch with you soon.");
-
 			}).error(function(data, status, headers, config) {
 				$scope.result = data;
 				console.log("Sending message failed.");
@@ -143,6 +142,7 @@ angular.module('app.controllers', [])
 	.controller("WelcomeCtrl", function($scope, $location) {})
 	.controller("TopicCtrl", function($scope, $location) {})
 	.controller("GroupCtrl", function($scope, $location) {})
+	.controller("PostCtrl", function($scope, $location) {})
 	.controller("AlertCtrl", function($scope) {
 		$scope.alerts = [];
 		$scope.addAlert = function(alert) {
@@ -180,8 +180,11 @@ angular.module('app.controllers', [])
 			});
 		};
 	})
-	.controller('ClassifiedCtrl', function($scope, SearchService) {
+	.controller('ClassifiedCtrl', function($scope, $http, SearchService) {
 		$scope.results = new SearchService();
+		$http.post('/api/stats.html').success(function(data) {
+			$scope.stats = data.stats;
+		})
 	})
 	.controller('HeaderCtrl', function($scope, $location, $rootScope) {
 		$scope.isMenu = $rootScope.isMenu;
@@ -202,47 +205,20 @@ angular.module('app.controllers', [])
 		$http.post('/search/slider.html').success(function(data) {
 			$scope.slides = data;
 		})
-	});
-
-
-angular.module('App', ['$strap.directives'])
-	.controller('AppCtrl', function($scope) {
-
-	});
-
-function GenericViewCtrl($scope) {}
-GenericViewCtrl.$inject = ['$scope'];
-
-function ContactViewCtrl($scope, $http) {
-	$scope.lastForm = {};
-	$scope.sendForm = function(form) {
-		$scope.lastForm = angular.copy(form);
-		$http({
-			method: 'POST',
-			url: "/backend/email.php",
-			data: {
-				'contactname': $scope.form.name,
-				'weburl': $scope.form.website,
-				'email': $scope.form.email,
-				'app': $scope.form.project,
-				'subject': $scope.form.subject,
-				'message': $scope.form.message
-			},
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+	})
+	.controller('ContactCtrl', ['$scope', '$http',
+		function($scope, $http) {
+			$scope.send = function(form) {
+				$http.post('/contact.html', form).success(function(data) {
+					$scope.data = data;
+				});
 			}
-		}).success(function(data, status, headers, config) {
-			$scope.resultData = data;
-			alert("Message sent successfully. We'll get in touch with you soon.");
-
-		}).error(function(data, status, headers, config) {
-			$scope.resultData = data;
-			alert("Sending message failed.");
-		});
-	}
-	$scope.resetForm = function() {
-		$scope.form = angular.copy($scope.lastForm);
-	}
-}
-
-ContactViewCtrl.$inject = ['$scope', '$http'];
+		}
+	])
+	.controller('FollowCtrl', ['$scope', '$http',
+		function($scope, $http) {
+			$http.post('/api/follow.html').success(function(data) {
+				$scope.follows = data;
+			});
+		}
+	]);

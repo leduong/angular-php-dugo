@@ -20,21 +20,32 @@
  *
  *
  */
-/**
- * Controller_Sidebar_Index class
- *
- * @package Controller_Sidebar_Index
- * @author [author] <[email]>
- * @filename {{app}}/controller/sidebar/index.php
- * @template {{app}}/view/sidebar/index.php
- **/
 
-class Controller_Sidebar_Index extends Controller
+
+/*** for MySQL
+
+
+CREATE TABLE IF NOT EXISTS `likes` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`post` int(11) NOT NULL,
+`by` int(11) NOT NULL,
+`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+***/
+
+
+/**
+ * Model class
+ *
+ * @package default
+ * @author
+ **/
+class Model_Follows extends ORM
 {
-  public function index()
-  {
-  	$tpl = new Template('pagesidebar');
-	echo $tpl->make();
-	exit;
-  }
+	public static $t = 'follows';
+	public static $f = 'by'; // FOREIGN KEY
+	public static $h = array('user' => 'Model_User');
 } // END class

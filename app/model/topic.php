@@ -20,21 +20,31 @@
  *
  *
  */
-/**
- * Controller_Sidebar_Index class
- *
- * @package Controller_Sidebar_Index
- * @author [author] <[email]>
- * @filename {{app}}/controller/sidebar/index.php
- * @template {{app}}/view/sidebar/index.php
- **/
 
-class Controller_Sidebar_Index extends Controller
+
+/*** for MySQL
+
+CREATE TABLE IF NOT EXISTS `city` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) DEFAULT NULL,
+  `slug` varchar(32) DEFAULT NULL,
+  `enable` tinyint(1) DEFAULT NULL,
+  `sort` int(11) DEFAULT NULL,
+  `country_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `country_id` (`country_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
+
+***/
+
+
+/**
+ * Model class
+ *
+ * @package default
+ * @author
+ **/
+class Model_Topic extends ORM
 {
-  public function index()
-  {
-  	$tpl = new Template('pagesidebar');
-	echo $tpl->make();
-	exit;
-  }
+  public static $t = 'topic';
 } // END class

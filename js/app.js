@@ -28,12 +28,20 @@ var app = angular.module('app', ['app.filters', 'app.services', 'app.directives'
 				controller: 'TagCtrl'
 			});
 			$routeProvider.when('/topic/:topicId', {
-				templateUrl: 'topic.html',
+				templateUrl: 'topic/index.html',
 				controller: 'TopicCtrl'
 			});
 			$routeProvider.when('/group/:groupId', {
-				templateUrl: 'group.html',
+				templateUrl: 'group/index.html',
 				controller: 'GroupCtrl'
+			});
+			$routeProvider.when('/post/:postId', {
+				templateUrl: 'post/index.html',
+				controller: 'PostCtrl'
+			});
+			$routeProvider.when('/contact/:contactId', {
+				templateUrl: 'contact.html',
+				controller: 'ContactCtrl'
 			});
 			$routeProvider.when('/sale.html', {
 				templateUrl: 'sale.html',

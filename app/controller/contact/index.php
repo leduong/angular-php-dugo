@@ -31,33 +31,38 @@
 
 class Controller_Contact_Index extends Controller
 {
-  public function index()
-  {
-  	if($_SERVER['REQUEST_METHOD'] == "POST"){
-  		$Input = input();
-  		$message = sprintf("Họ tên: %s\nEmail: %s\nĐịa chỉ: %s\nĐiện thoại: %s\n\nNội dung:\n%s\n\n\n--\n%s",
-  			$Input->full_name,
-  			$Input->email,
-  			$Input->address,
-  			$Input->phone,
-  			$Input->message,
-  			DOMAIN);
-		$mail = new Mail();
-		if(is_array($smtp)){
-			$mail->protocol = 'smtp';
-			$mail->hostname = $smtp['smtp_hostname'];
-			$mail->username = $smtp['smtp_username'];
-			$mail->password = $smtp['smtp_password'];
+  public function index() {
+		if(AJAX_REQUEST){
+			if(POST){
+				$Input = input();
+				$message = sprintf("Họ tên: %s\nEmail: %s\nĐịa chỉ: %s\nĐiện thoại: %s\n\nNội dung:\n%s\n\n\n--\n%s",
+					$Input->full_name,
+					$Input->email,
+					$Input->address,
+					$Input->phone,
+					$Input->message,
+					DOMAIN);
+				$mail = new Mail();
+				if(is_array($smtp)){
+					$mail->protocol = 'smtp';
+					$mail->hostname = $smtp['smtp_hostname'];
+					$mail->username = $smtp['smtp_username'];
+					$mail->password = $smtp['smtp_password'];
+				}
+				$mail->setTo($this->appsite['email']);
+				$mail->setFrom($Input->email);
+				$mail->setSender($Input->full_name);
+				$mail->setSubject(sprintf('Liên hệ: %s gởi thông tin từ website.', $Input->full_name));
+				$mail->setText(html_entity_decode($Input->message, ENT_QUOTES, 'UTF-8'));
+				$mail->send();
+				Response::json(array('flash' => 'sent'));
+			}
+			else{
+				$tpl = new Template("contact/index");
+				echo $tpl->make();
+			}
+			exit;
 		}
-		$mail->setTo($this->appsite['email']);
-		$mail->setFrom($Input->email);
-		$mail->setSender($Input->full_name);
-		$mail->setSubject(sprintf('Liên hệ: %s gởi thông tin từ website.', $Input->full_name));
-		$mail->setText(html_entity_decode($Input->message, ENT_QUOTES, 'UTF-8'));
-		$mail->send();
-		Response::json(array('flash' => 'sent'));
-		exit;
-  	}
-  	else $this->content = new View('page/contact');
+		else $this->content = '';
   }
 } // END class

@@ -37,6 +37,15 @@ header .nhadat a {
 	text-decoration: none;
 }
 
+header .nhadat .ver {
+	color: #ddd;
+	font-size: 10pt;
+	text-decoration: none;
+	position: absolute;
+	top: 27px;
+	left: 90px;
+}
+
 header ul {
 	list-style-type: none;
 	z-index: 9998;
@@ -210,7 +219,8 @@ hr {
 /*-------------------------Column Separation-------------------------------------*/
 /*/
 /*/
-///////////////////////////////////////////////////////////////////////////// ///////////////////////////////////////////////////////////////////////////// .column p,a {
+
+.column p,a {
 	margin-bottom: 0px;
 	padding-bottom: 0px;
 }
@@ -516,8 +526,8 @@ li.active .nav-sale {
 	display: inline-block;
 }
 
-.carousel-control{position:absolute;top:40%;left:15px;width:40px;height:40px;margin-top:-20px;font-size:60px;font-weight:100;line-height:30px;color:#ffffff;text-align:center;background:#222222;border:3px solid #ffffff;-webkit-border-radius:23px;-moz-border-radius:23px;border-radius:23px;opacity:0.2;filter:alpha(opacity=20);}
-.carousel-control.right{left:auto;right:15px;}
+.carousel-control{position:absolute;top:40%;left:7px;width:40px;height:40px;margin-top:-20px;font-size:60px;font-weight:100;line-height:30px;color:#ffffff;text-align:center;background:#222222;border:3px solid #ffffff;-webkit-border-radius:23px;-moz-border-radius:23px;border-radius:23px;opacity:0.2;filter:alpha(opacity=20);}
+.carousel-control.right{left:auto;right:7px;}
 
 
 .i-email, .i-go, .price {
@@ -628,8 +638,10 @@ li.active .nav-sale {
 .classifieds p {
 	z-index: 100;
 	min-height: 140px;
+	max-height: 160px;
 	margin-top: 5px;
 	font-size: 10pt;
+	text-align: justify
 }
 
 .classifieds .center .one-half {
