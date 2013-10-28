@@ -27,6 +27,10 @@ var app = angular.module('app', ['app.filters', 'app.services', 'app.directives'
 				templateUrl: 'tag.html',
 				controller: 'TagCtrl'
 			});
+			$routeProvider.when('/city/:cityId', {
+				templateUrl: 'city.html',
+				controller: 'CityCtrl'
+			});
 			$routeProvider.when('/topic/:topicId', {
 				templateUrl: 'topic/index.html',
 				controller: 'TopicCtrl'

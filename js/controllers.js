@@ -139,10 +139,113 @@ angular.module('app.controllers', [])
 			});
 		};
 	})
-	.controller("WelcomeCtrl", function($scope, $location) {})
-	.controller("TopicCtrl", function($scope, $location) {})
-	.controller("GroupCtrl", function($scope, $location) {})
-	.controller("PostCtrl", function($scope, $location) {})
+	.controller("WelcomeCtrl", function($scope) {})
+	.controller("TopicCtrl", function($scope, $routeParams) {})
+	.controller("GroupCtrl", function($scope, $http, $routeParams) {
+		$scope.rate = 3;
+		$scope.max = 5;
+		$scope.isReadonly = false;
+		google.maps.visualRefresh = true;
+		$scope.center = {
+			latitude: 10.823099,
+			longitude: 106.629664
+		};
+		$scope.zoom = 15;
+		$scope.markers = [];
+		$scope.markerLat = 10.885157;
+		$scope.markerLng = 106.701064;
+		$scope.addMarker = function() {
+			$scope.markers.push({
+				latitude: parseFloat($scope.markerLat),
+				longitude: parseFloat($scope.markerLng)
+			});
+			$scope.markerLat = null;
+			$scope.markerLng = null;
+		};
+
+		$scope.geolocationAvailable = navigator.geolocation ? true : false;
+		$scope.checkin = function() {
+			if ($scope.geolocationAvailable) {
+				navigator.geolocation.getCurrentPosition(function(position) {
+					$scope.center = {
+						latitude: position.coords.latitude,
+						longitude: position.coords.longitude
+					};
+					$scope.$apply();
+				}, function() {
+
+				});
+			}
+		};
+		$http.post('/api/group.html', {
+			"slug": $routeParams.groupId
+		})
+			.success(function(data) {
+				$scope.group = data.group;
+				$scope.center = {
+					latitude: $scope.group.map[0],
+					longitude: $scope.group.map[1]
+				};
+			})
+			.error(function(data, status) {
+				if (status === 404) {
+					$scope.group = [];
+				}
+			});
+	})
+	.controller("CityCtrl", function($scope, $http, $routeParams) {
+		$scope.rate = 3;
+		$scope.max = 5;
+		$scope.isReadonly = false;
+		google.maps.visualRefresh = true;
+		$scope.center = {
+			latitude: 10.823099,
+			longitude: 106.629664
+		};
+		$scope.zoom = 15;
+		$scope.markers = [];
+		$scope.markerLat = 10.885157;
+		$scope.markerLng = 106.701064;
+		$scope.addMarker = function() {
+			$scope.markers.push({
+				latitude: parseFloat($scope.markerLat),
+				longitude: parseFloat($scope.markerLng)
+			});
+			$scope.markerLat = null;
+			$scope.markerLng = null;
+		};
+
+		$scope.geolocationAvailable = navigator.geolocation ? true : false;
+		$scope.checkin = function() {
+			if ($scope.geolocationAvailable) {
+				navigator.geolocation.getCurrentPosition(function(position) {
+					$scope.center = {
+						latitude: position.coords.latitude,
+						longitude: position.coords.longitude
+					};
+					$scope.$apply();
+				}, function() {
+
+				});
+			}
+		};
+		$http.post('/api/city.html', {
+			"slug": $routeParams.cityId
+		})
+			.success(function(data) {
+				$scope.city = data.city;
+				$scope.center = {
+					latitude: $scope.city.map[0],
+					longitude: $scope.city.map[1]
+				};
+			})
+			.error(function(data, status) {
+				if (status === 404) {
+					$scope.city = [];
+				}
+			});
+	})
+	.controller("PostCtrl", function($scope, $routeParams) {})
 	.controller("AlertCtrl", function($scope) {
 		$scope.alerts = [];
 		$scope.addAlert = function(alert) {
@@ -193,14 +296,17 @@ angular.module('app.controllers', [])
 			return page === currentRoute ? 'active' : '';
 		};
 	})
-	.controller('RatingCtrl', ['$scope',
+	.controller('ProfileCtrl', ['$scope',
 		function($scope) {
 			$scope.rate = 3;
 			$scope.max = 5;
 			$scope.isReadonly = false;
+			$http.post('/api/user.html').success(function(data) {
+				$scope.user = data;
+			})
 		}
 	])
-	.controller('CarouselCtrl', function($scope, $http) {
+	.controller('SliderCtrl', function($scope, $http) {
 		$scope.myInterval = 60000;
 		$http.post('/search/slider.html').success(function(data) {
 			$scope.slides = data;
@@ -220,5 +326,10 @@ angular.module('app.controllers', [])
 			$http.post('/api/follow.html').success(function(data) {
 				$scope.follows = data;
 			});
+		}
+	])
+	.controller('CommentsCtrl', ['$scope',
+		function($scope) {
+
 		}
 	]);

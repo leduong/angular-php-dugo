@@ -93,4 +93,4 @@ var services = angular.module('app.services', [])
 			}
 		};
 	})
-	.value('version', '0.2');
+	.value('version', '© 2013 nhadat.com');

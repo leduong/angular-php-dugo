@@ -13,6 +13,8 @@ body {
 	width: 100%;
 }
 
+a {color: #0796a7;}
+
 header {
 	height: 45px;
 	background-color: #ef6d1e;
@@ -313,7 +315,7 @@ hr {
 /* Button */
 
 .callsms {
-	padding-bottom: 10px
+	padding-bottom: 0;
 }
 
 .callsms a,.callsms a:hover {
@@ -638,7 +640,6 @@ li.active .nav-sale {
 .classifieds p {
 	z-index: 100;
 	min-height: 140px;
-	max-height: 160px;
 	margin-top: 5px;
 	font-size: 10pt;
 	text-align: justify
@@ -922,4 +923,8 @@ form.sale {
 }
 .messages .datetime span:last-child:after{
 	content:"";
+}
+
+.group h1, .group p{
+	color: #0796a7;
 }

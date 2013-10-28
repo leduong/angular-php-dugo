@@ -39,8 +39,8 @@ class Controller_Search_Index extends Controller
 				$limit=10;
 				$page=((int)get('page')>1)?(int)get('page'):1;
 				$offset=$limit*($page-1);
-				$request = input();
-				$keywords = explode(",", $request->keyword);
+				$input = input();
+				$keywords = explode(",", $input->keyword);
 				$query = '';
 
 				foreach ($keywords as $k) {
@@ -71,7 +71,9 @@ class Controller_Search_Index extends Controller
 								'meta' => $meta,
 								'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
 								'user' => array(
+									'username' => $u->username,
 									'name' => $u->first_name." ".$u->last_name,
+									'avatar' => "http://www.gravatar.com/avatar/".md5($u->email)."?s=20&d=wavatar&r=g",
 									'phone' => $u->phone,
 									),
 							);
@@ -108,13 +110,16 @@ class Controller_Search_Index extends Controller
 					$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
 				}
 				$array[]= array(
+					'id' => $m->id,
 					'title' => '',
 					'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=320&h=320&t=m&src='.$m->value:'/uploads/media/3.jpg',
 					'tag' => $tag,
 					'meta' => $meta,
 					'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
 					'user' => array(
+						'username' => $u->username,
 						'name' => $u->first_name." ".$u->last_name,
+						'avatar' => "http://www.gravatar.com/avatar/".md5($u->email)."?s=20&d=wavatar&r=g",
 						'phone' => $u->phone,
 						),
 				);
@@ -128,8 +133,8 @@ class Controller_Search_Index extends Controller
 		if(AJAX_REQUEST){
 			$array = array();
 			if(POST){
-				$request = input();
-				$keyword = string::slug($request->keyword);/*
+				$input = input();
+				$keyword = string::slug($input->keyword);/*
 				$fetch = Model_Zipcode::fetch(array("slug LIKE '%$keyword%'"),8);
 				if ($fetch){
 					foreach ($fetch as $f) {
@@ -168,7 +173,7 @@ class Controller_Search_Index extends Controller
 			$array = array();
 			if(POST){
 				$request = input();
-				$keyword = string::slug($request->keyword);
+				$keyword = string::slug($input->keyword);
 				$fetch = Model_Zipcode::fetch(array("slug LIKE '%$keyword%'"),8);
 				if ($fetch){
 					foreach ($fetch as $f) {
@@ -205,7 +210,9 @@ class Controller_Search_Index extends Controller
 					'meta' => $meta,
 					'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
 					'user' => array(
+						'username' => $u->username,
 						'name' => $u->first_name." ".$u->last_name,
+						'avatar' => "http://www.gravatar.com/avatar/".md5($u->email)."?s=20&d=wavatar&r=g",
 						'phone' => $u->phone,
 						),
 				);

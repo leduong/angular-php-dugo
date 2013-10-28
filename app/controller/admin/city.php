@@ -65,20 +65,24 @@ class Controller_Admin_City extends Controller
 		if($validation->run($rules))
 		{
 			$c = new Model_City();
-			$c->name = post('name');
-			$c->slug = string::sanitize_url(post('name'));
-			$c->sort = post('sort');
-			$c->enable = post('enable')?1:0;
+			$c->name        = post('name');
+			$c->description = post('description');
+			$c->slug        = string::sanitize_url(post('name'));
+			$c->map         = post('map');
+			$c->sort        = post('sort');
+			$c->enable      = post('enable')?1:0;
 			$c->save();
 			$this->content->message = lang('success');
 			unset($_POST);
 		}
 		
 		$fields = array(
-			'name' => array('div' => array('class' => 'control-group')),
-			'sort' => array('div' => array('class' => 'control-group')),
-			'enable' => array('type' => 'checkbox', 'value'=>'1', 'div' => array('class' => 'control-group')),
-			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
+			'name'        => array('div' => array('class' => 'control-group')),
+			'description' => array('div' => array('class' => 'control-group')),
+			'map'         => array('div' => array('class' => 'control-group')),
+			'sort'        => array('div' => array('class' => 'control-group')),
+			'enable'      => array('type' => 'checkbox', 'value'=>'1', 'div' => array('class' => 'control-group')),
+			'submit'      => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 
 		$form = new Form($validation, array('id' => 'form', 'class' => 'form-horizontal'));
@@ -98,10 +102,12 @@ class Controller_Admin_City extends Controller
 		if($validation->run($rules))
 		{
 			$c = new Model_City(post('key'));
-			$c->name = post('name');
-			$c->slug = string::sanitize_url(post('name'));
-			$c->sort = post('sort');
-			$c->enable = post('enable')?1:0;
+			$c->name        = post('name');
+			$c->description = post('description');
+			$c->slug        = string::sanitize_url(post('name'));
+			$c->map         = post('map');
+			$c->sort        = post('sort');
+			$c->enable      = post('enable')?1:0;
 			$c->save();
 			unset($_POST);
 			$this->content->message = lang('success');
@@ -110,9 +116,11 @@ class Controller_Admin_City extends Controller
 		$c = new Model_City(get('edit'));
 
 		$fields = array(
-			'key' => array('type' => 'hidden', 'value' => $c->id),
-			'name' => array('value' => $c->name, 'div' => array('class' => 'control-group')),
-			'sort' => array('value' => $c->sort, 'div' => array('class' => 'control-group')),
+			'key'    => array('type' => 'hidden', 'value' => $c->id),
+			'name'   => array('value' => $c->name, 'div' => array('class' => 'control-group')),
+			'description' => array('value' => $c->description, 'div' => array('class' => 'control-group')),
+			'map'    => array('value' => $c->map, 'div' => array('class' => 'control-group')),
+			'sort'   => array('value' => $c->sort, 'div' => array('class' => 'control-group')),
 			'enable' => array('value' => '1', 'check'=>$c->enable ,'type' => 'checkbox', 'div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);

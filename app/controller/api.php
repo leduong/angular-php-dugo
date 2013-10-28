@@ -15,7 +15,7 @@ class Controller_Api extends Controller
 			if ($u = unserialize(cookie::get('user'))){
 				$tags = Model_Follows::fetch(array('by' => $u['idu']));
 			} else {
-				if ($ar = Model_City::fetch(array(),3)) foreach ($ar as $a) $city[]  = $a->to_array();
+				if ($ar = Model_City::fetch(array(),3,0,array('sort' => 'DESC'))) foreach ($ar as $a) $city[]  = $a->to_array();
 				if ($ar = Model_Group::fetch(array(),3))foreach ($ar as $a) $group[] = $a->to_array();
 				if ($ar = Model_Topic::fetch(array(),3))foreach ($ar as $a) $topic[] = $a->to_array();
 				if ($ar = Model_User::fetch(array(),3)) foreach ($ar as $a){

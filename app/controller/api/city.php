@@ -21,22 +21,30 @@
  *
  */
 /**
- * Controller_Welcome_Index class
+ * Controller_Api_City class
  *
  * @package Controller_Welcome_Index
  * @author [author] <[email]>
- * @filename {{app}}/controller/welcome/index.php
- * @template {{app}}/view/welcome/index.php
+ * @filename {{app}}/controller/api/city.php
+ * @template {{app}}/view/api/city.php
  **/
 
-class Controller_Post_Index extends Controller
+class Controller_Api_City extends Controller
 {
 	public function index()
 	{
 		if(AJAX_REQUEST){
-			$tpl = new Template("tag/index");
-			echo $tpl->make();
-			exit;
-		} else $this->content = '';
+			if(POST){
+				$input = input();
+				if(isset($input->slug)) if($fetch = Model_City::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
+					$city = $fetch[0]->to_array();
+					$city['map'] = explode(",",$city["map"]);
+					Response::json(array('city' => $city));
+				} else{
+					Response::json(array('city' => array()),404);
+				}
+			}
+		}
+		exit();
 	}
 } // END class

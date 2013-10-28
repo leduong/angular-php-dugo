@@ -33,6 +33,6 @@ class Controller_Common_Index extends Controller
 {
   public function index()
   {
-    $this->content = new View('index');
+    
   }
 } // END class

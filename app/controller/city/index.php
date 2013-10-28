@@ -21,22 +21,21 @@
  *
  */
 /**
- * Controller_Welcome_Index class
+ * Controller_City_Index class
  *
- * @package Controller_Welcome_Index
+ * @package Controller_City_Index
  * @author [author] <[email]>
- * @filename {{app}}/controller/welcome/index.php
- * @template {{app}}/view/welcome/index.php
+ * @filename {{app}}/controller/city/index.php
+ * @template {{app}}/view/city/index.php
  **/
 
-class Controller_Post_Index extends Controller
+class Controller_City_Index extends Controller
 {
-	public function index()
-	{
+	public function index(){
 		if(AJAX_REQUEST){
-			$tpl = new Template("tag/index");
+			$tpl = new Template("city/index");
 			echo $tpl->make();
 			exit;
 		} else $this->content = '';
 	}
-} // END class
+}

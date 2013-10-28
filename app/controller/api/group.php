@@ -21,22 +21,30 @@
  *
  */
 /**
- * Controller_Welcome_Index class
+ * Controller_Api_Group class
  *
  * @package Controller_Welcome_Index
  * @author [author] <[email]>
- * @filename {{app}}/controller/welcome/index.php
- * @template {{app}}/view/welcome/index.php
+ * @filename {{app}}/controller/api/group.php
+ * @template {{app}}/view/api/group.php
  **/
 
-class Controller_Post_Index extends Controller
+class Controller_Api_Group extends Controller
 {
 	public function index()
 	{
 		if(AJAX_REQUEST){
-			$tpl = new Template("tag/index");
-			echo $tpl->make();
-			exit;
-		} else $this->content = '';
+			if(POST){
+				$input = input();
+				if(isset($input->slug)) if($fetch = Model_Group::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
+					$group = $fetch[0]->to_array();
+					$group['map'] = explode(",",$group["map"]);
+					Response::json(array('group' => $group));
+				} else{
+					Response::json(array('group' => array()),404);
+				}
+			}
+		}
+		exit();
 	}
 } // END class

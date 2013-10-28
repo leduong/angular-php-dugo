@@ -9,22 +9,70 @@ angular.module('app.directives', [])
 			};
 		}
 	])
+	.directive('scrolltop', function() {
+		return {
+			restrict: "E",
+			template: '<a href="#" class="scroll-top"><i class="icon-chevron-up"></i></a>'
+		}
+	})
 	.directive('mainnav', function() {
 		return {
 			restrict: "E",
-			templateUrl: "nav.html"
+			templateUrl: "/nhadat/html/nav.html"
+		}
+	})
+	.directive('slider', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/slider.html"
+		}
+	})
+	.directive('comments', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/comments.html"
+		}
+	})
+	.directive('agent', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/agent.html"
+		}
+	})
+	.directive('notice', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/notice.html"
+		}
+	})
+	.directive('classifieds', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/classifieds.html"
+		}
+	})
+	.directive('follows', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/follows.html"
+		}
+	})
+	.directive('profile', function() {
+		return {
+			restrict: "E",
+			templateUrl: "/nhadat/html/profile.html"
 		}
 	})
 	.directive('search', function() {
 		return {
 			restrict: "E",
-			templateUrl: "/themes/nhadat/html/search/index.html"
+			templateUrl: "search.html"
 		}
 	})
 	.directive('flash', function() {
 		return {
 			restrict: "E",
-			templateUrl: "flash.html"
+			templateUrl: "/nhadat/html/flash.html"
 		}
 	})
 	.directive('mainpage', function($rootScope) {

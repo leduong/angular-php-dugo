@@ -21,18 +21,18 @@
  *
  */
 /**
- * Controller_Welcome_Index class
+ * Controller_Common_404 class
  *
- * @package Controller_Welcome_Index
+ * @package Controller_Common_404
  * @author [author] <[email]>
- * @filename {{app}}/controller/common/index.php
- * @template {{app}}/view/welcome/index.php
+ * @filename {{app}}/controller/common/404.php
+ * @template {{app}}/view/common/404.php
  **/
 
 class Controller_Common_404 extends Controller
 {
   public function index()
   {
-    $this->content = new View('common/404');
+    //$this->content = new View('common/404');
   }
 } // END class
