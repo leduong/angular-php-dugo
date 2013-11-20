@@ -34,7 +34,7 @@ class Controller_Post_Index extends Controller
 	public function index()
 	{
 		if(AJAX_REQUEST){
-			$tpl = new Template("tag/index");
+			$tpl = new Template("post/index");
 			echo $tpl->make();
 			exit;
 		} else $this->content = '';

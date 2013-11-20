@@ -10,6 +10,26 @@ angular.module('app.filters', [])
 			}
 		}
 	])
+	.filter('pricify', function() {
+		return function(input) {
+			input = parseInt(input);
+			if (input < 1000) {
+				return input;
+			} else if (input < 100000) {
+				input = Math.round(input * 1000) / 1000;
+				return input + '.000';
+			} else if ((input < 1000000)) {
+				input = Math.round((input / 1000000) * 100) / 100;
+				return input + '<small>TR</small>';
+			} else if ((input < 1000000000)) {
+				input = Math.round((input / 1000000) * 100) / 100;
+				return input + '<small>TR</small>';
+			} else {
+				input = Math.round((input / 1000000000) * 100) / 100;
+				return input + '<small>TỶ</small>';
+			}
+		}
+	})
 	.filter('characters', function() {
 		return function(input, chars, breakOnWord) {
 			if (isNaN(chars)) return input;

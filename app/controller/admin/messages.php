@@ -65,43 +65,58 @@ class Controller_Admin_Messages extends Controller
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
-			$c = new Model_Messages();
-			$c->uid = post('uid');
+			$c          = new Model_Messages();
+			$c->uid     = post('uid');
 			$c->message = post('message');
+			$c->type    = post('type');
+			$c->tag     = post('tag');
 			$c->save();
 
 			$meta = array();
 			if(post('address') != '') $meta['address'] = post('address');
-			if(post('phone') != '') $meta['phone'] = post('phone');
-			if(post('map') != '') $meta['map'] = post('map');
-			if(post('price') != '') $meta['price'] = post('price');
-			foreach($meta as $k=>$m){
+			if(post('phone')   != '') $meta['phone'] = post('phone');
+			if(post('map')     != '') $meta['map'] = post('map');
+			if(post('price')   != '') $meta['price'] = post('price');
+			foreach($meta as $k => $v){
 				$mt = new Model_MessagesMeta();
 				$mt->msg_id = $c->id;
 				$mt->type = $k;
-				$mt->value = $m;
+				$mt->value = $v;
 				$mt->save();
 			}
 
+			// Tags
+			$del = Model_TagsOccurrence::fetch(array('msg_id' => $c->id));
+			if ($del) foreach ($del as $d) $d->delete();
+			$tags = explode(',',$c->tag.",".$meta['price'].",".$meta['address']);
+			if ($tags) foreach ($tags as $tag) {
+				$tag_id = Model_Tags::get_or_insert($tag);
+				if ($tag_id){
+					$tags_occurrence         = new Model_TagsOccurrence();
+					$tags_occurrence->msg_id = $c->id;
+					$tags_occurrence->tag_id = $tag_id;
+					$tags_occurrence->save();
+				}
+			}
+			// end Tags
 			$this->content->message = lang('success');
 			unset($_POST);
 		}
 
 		$users = array(''=>'Choose');
-
-		if($us = Model_User::fetch())
-			foreach($us as $u){
-				$users[$u->idu] = $u->username;
-			}
+		$types = array('status'=>'Status','picture'=>'Picture','video'=>'Video','realestate'=>'Real Estate');
+		if($ar = Model_User::fetch()) foreach($ar as $a) $users[$a->idu] = $a->username;
 
 		$fields = array(
-			'uid' => array('type'=>'select', 'options'=>$users, 'div' => array('class' => 'control-group')),
-			'message' => array('div' => array('class' => 'control-group')),
-			'address'=> array('div' => array('class' => 'control-group')),
-			'phone'=> array('div' => array('class' => 'control-group')),
-			'map'=> array('div' => array('class' => 'control-group')),
-			'price'=> array('div' => array('class' => 'control-group')),
-			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
+			'uid'     => array('type'=>'select', 'options'=>$users, 'div' => array('class' => 'control-group')),
+			'type'    => array('type'=>'select', 'options'=>$types, 'div' => array('class' => 'control-group')),
+			'message' => array('type' => 'textarea', 'div' => array('class' => 'control-group')),
+			'tag'     => array('div' => array('class' => 'control-group')),
+			'address' => array('div' => array('class' => 'control-group')),
+			'phone'   => array('div' => array('class' => 'control-group')),
+			'map'     => array('div' => array('class' => 'control-group')),
+			'price'   => array('div' => array('class' => 'control-group')),
+			'submit'  => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 
 		$form = new Form($validation, array('id' => 'form', 'class' => 'form-horizontal'));
@@ -124,6 +139,7 @@ class Controller_Admin_Messages extends Controller
 			$msg_id = $c->id;
 			$c->message = post('message');
 			$c->tag = post('tag');
+			$c->type = post('type');
 			$c->save();
 			// Tags
 			$del = Model_TagsOccurrence::fetch(array('msg_id' => $msg_id));
@@ -144,9 +160,9 @@ class Controller_Admin_Messages extends Controller
 			if ($del) foreach ($del as $d) $d->delete();
 			$meta = array();
 			if(post('address') != '') $meta['address'] = post('address');
-			if(post('phone') != '') $meta['phone'] = post('phone');
-			if(post('map') != '') $meta['map'] = post('map');
-			if(post('price') != '') $meta['price'] = post('price');
+			if(post('phone')   != '') $meta['phone'] = post('phone');
+			if(post('map')     != '') $meta['map'] = post('map');
+			if(post('price')   != '') $meta['price'] = post('price');
 			foreach($meta as $k=>$m){
 				$mt = new Model_MessagesMeta();
 				$mt->msg_id = $msg_id;
@@ -165,22 +181,25 @@ class Controller_Admin_Messages extends Controller
 		$uid = new Model_User($c->uid);
 		$metas = Model_MessagesMeta::fetch(array('msg_id'=>$c->id));
 		$ms = array('address'=>'','phone'=>'','map'=>'','price'=>'');
+		$types = array('status'=>'Status','picture'=>'Picture','video'=>'Video','realestate'=>'Real Estate');
+
 		foreach($metas as $m){
 			$ms[$m->type] = $m->value;
 		}
 		$user = sprintf("%s %s (%s)",$uid->first_name, $uid->last_name, $uid->username);
 
 		$fields = array(
-			'key' => array('type' => 'hidden', 'value' => $c->id),
-			'uid' => array('value' => $user, 'attributes' => array('disabled' => 'disabled')),
-			'message' => array('type' => 'textarea', 'value' => $c->message, 'div' => array('class' => 'control-group'),
+			'key'        => array('type' => 'hidden', 'value' => $c->id),
+			'uid'        => array('value' => $user, 'attributes' => array('disabled' => 'disabled')),
+			'type'       => array('value' => $c->type, 'type'=>'select', 'options'=>$types,),
+			'message'    => array('type' => 'textarea', 'value' => $c->message, 'div' => array('class' => 'control-group'),
 			'attributes' => array('rows' => 10, 'name' => 'message', 'width' => '100%')),
-			'tag' => array('value' => $c->tag, 'div' => array('class' => 'control-group')),
-			'address'=> array('value' => $ms['address'], 'div' => array('class' => 'control-group')),
-			'phone'=> array('value' => $ms['phone'], 'div' => array('class' => 'control-group')),
-			'map'=> array('value' => $ms['map'], 'div' => array('class' => 'control-group')),
-			'price'=> array('value' => $ms['price'], 'div' => array('class' => 'control-group')),
-			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
+			'tag'        => array('value' => $c->tag, 'div' => array('class' => 'control-group')),
+			'address'    => array('value' => $ms['address'], 'div' => array('class' => 'control-group')),
+			'phone'      => array('value' => $ms['phone'], 'div' => array('class' => 'control-group')),
+			'map'        => array('value' => $ms['map'], 'div' => array('class' => 'control-group')),
+			'price'      => array('value' => $ms['price'], 'div' => array('class' => 'control-group')),
+			'submit'     => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 		$form = new Form($validation, array('id' => 'form', 'class' => 'form-horizontal'));
 		$form->fields($fields);

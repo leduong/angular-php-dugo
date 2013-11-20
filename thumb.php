@@ -21,13 +21,13 @@
  * everytime you download a new version
 */
 
-require_once('./includes/config.php');
+//require_once('./includes/config.php');
 
 if(!empty($_GET['t'])) {
 	if($_GET['t'] == 'a') {
 		$type = 'uploads/avatars';
-		$width_list = array(25, 50, 112, 150, 200);
-		$height_list = array(25, 50, 112, 150, 200);
+		$width_list = array(25, 50, 112, 150, 200, 320);
+		$height_list = array(25, 50, 112, 150, 200, 320);
 		$quality_list = array(50, 75, 100);
 	} elseif($_GET['t'] == 'm') {
 		$type = 'uploads/media';
@@ -36,8 +36,8 @@ if(!empty($_GET['t'])) {
 		$quality_list = array(50, 75, 100);
 	} elseif($_GET['t'] == 'c') {
 		$type = 'uploads/covers';
-		$width_list = array(800, 900, 1000);
-		$height_list = array(100, 200, 300);
+		$width_list = array(800, 900, 1000, 630);
+		$height_list = array(100, 200, 300, 630);
 		$quality_list = array(50, 75, 100);
 	} else {
 		exit('Invalid parameter value');
@@ -47,7 +47,7 @@ if(!empty($_GET['t'])) {
 }
 
 // Build up the src query
-$_GET['src'] = $CONF['url'].'/'.$type.'/'.$_GET['src'];
+$_GET['src'] = $type.'/'.$_GET['src'];
 
 if(!empty($_GET['w'])) {
 	if(!in_array($_GET['w'], $width_list)) {
@@ -84,7 +84,7 @@ if(! defined('FILE_CACHE_TIME_BETWEEN_CLEANS'))	define ('FILE_CACHE_TIME_BETWEEN
 if(! defined('FILE_CACHE_MAX_FILE_AGE') ) 	define ('FILE_CACHE_MAX_FILE_AGE', 86400);				// How old does a file have to be to be deleted from the cache
 if(! defined('FILE_CACHE_SUFFIX') ) 		define ('FILE_CACHE_SUFFIX', '.timthumb.txt');			// What to put at the end of all files in the cache directory so we can identify them
 if(! defined('FILE_CACHE_PREFIX') ) 		define ('FILE_CACHE_PREFIX', 'timthumb');				// What to put at the beg of all files in the cache directory so we can identify them
-if(! defined('FILE_CACHE_DIRECTORY') ) 		define ('FILE_CACHE_DIRECTORY', './cache');				// Directory where images are cached. Left blank it will use the system temporary directory (which is better for security)
+if(! defined('FILE_CACHE_DIRECTORY') ) 		define ('FILE_CACHE_DIRECTORY', './uploads/cache');				// Directory where images are cached. Left blank it will use the system temporary directory (which is better for security)
 if(! defined('MAX_FILE_SIZE') )				define ('MAX_FILE_SIZE', 10485760);						// 10 Megs is 10485760. This is the max internal or external file size that we'll process.
 if(! defined('CURL_TIMEOUT') )				define ('CURL_TIMEOUT', 20);							// Timeout duration for Curl. This only applies if you have Curl installed and aren't using PHP's default URL fetching mechanism.
 if(! defined('WAIT_BETWEEN_FETCH_ERRORS') )	define ('WAIT_BETWEEN_FETCH_ERRORS', 3600);				// Time to wait between errors fetching remote file

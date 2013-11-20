@@ -6,18 +6,21 @@
 // In this case it is a simple value service.
 var services = angular.module('app.services', [])
 	.factory('SearchService', function($http) {
-		var SearchService = function() {
+		var SearchService = function(search) {
 			this.items = [];
 			this.busy = false;
 			this.page = 1;
 			this.end = false;
+			this.search = search || [];
 		};
 		SearchService.prototype.nextPage = function() {
 			if (this.end || this.busy) return;
 			this.busy = true;
-			var url = "/search/show.html?page=" + this.page + "&jsonp=JSON_CALLBACK";
 			if (!this.end) {
-				$http.jsonp(url).success(function(data) {
+				$http.post("/api/search.html", {
+					'page': this.page,
+					'search': this.search,
+				}).success(function(data) {
 					if (data.length > 0) {
 						for (var i = 0; i < data.length; i++) {
 							this.items.push(data[i]);
@@ -32,6 +35,36 @@ var services = angular.module('app.services', [])
 		};
 		return SearchService;
 	})
+	.factory('TagService', function($http) {
+		var TagService = function(search) {
+			this.items = [];
+			this.busy = false;
+			this.page = 1;
+			this.end = false;
+			this.search = search || '';
+		};
+		TagService.prototype.nextPage = function() {
+			if (this.end || this.busy) return;
+			this.busy = true;
+			if (!this.end) {
+				$http.post("/api/search/findtag.html", {
+					'page': this.page,
+					'keyword': this.search,
+				}).success(function(data) {
+					if (data.length > 0) {
+						for (var i = 0; i < data.length; i++) {
+							this.items.push(data[i]);
+						}
+						this.page++;
+					} else {
+						this.end = true;
+					}
+					this.busy = false;
+				}.bind(this));
+			}
+		};
+		return TagService;
+	})
 	.factory("FlashService", function($rootScope) {
 		return {
 			show: function(message) {
@@ -41,9 +74,6 @@ var services = angular.module('app.services', [])
 				$rootScope.flash = "";
 			}
 		}
-	})
-	.factory("Data", function($rootScope) {
-		return {isMenu: $rootScope.isMenu}
 	})
 	.factory("SessionService", function() {
 		return {

@@ -23,10 +23,11 @@ class Controller_Admin_Comments extends Controller
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
-		$limit=25;
-		$page=((int)get('page')>1)?(int)get('page'):1;
-		$offset=$limit*($page-1);
-		$total = Model_Comments::count();
+		$limit  = $this->appsite['limit_per_page'];
+		$page   = ((int)get('page')>1)?(int)get('page'):1;
+		$offset = $limit*($page-1);
+		$sort   = array('id' => 'DESC');
+		$total  = Model_Comments::count();
 		
 		$this->content = new View('comments');
 		$this->content->message = $this->content->form = NULL;

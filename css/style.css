@@ -1,5 +1,6 @@
 html {
 	text-align: center;
+	background-color: #ccc
 }
 
 body {
@@ -13,8 +14,13 @@ body {
 	width: 100%;
 }
 
-a {color: #0796a7;}
+a {
+	color: #0796a7;
+}
 
+a:hover{
+	text-decoration: none;
+}
 header {
 	height: 45px;
 	background-color: #ef6d1e;
@@ -41,11 +47,12 @@ header .nhadat a {
 
 header .nhadat .ver {
 	color: #ddd;
-	font-size: 10pt;
+	font-size: 6pt;
 	text-decoration: none;
+	text-transform: uppercase;
 	position: absolute;
 	top: 27px;
-	left: 90px;
+	left: 100px;
 }
 
 header ul {
@@ -79,15 +86,15 @@ h1,h2,h3 {
 }
 
 h1 {
-	font-size: 12pt;
+	font-size: 15pt;
 }
 
 h2 {
-	font-size: 11pt;
+	font-size: 14pt;
 }
 
 h3 {
-	font-size: 10pt;
+	font-size: 13pt;
 }
 
 h4 {
@@ -109,8 +116,12 @@ hr {
 	margin: 0 0 5px 0;
 }
 
+
+
 #mainpage {
 	min-height: 200px;
+	padding: 0;
+	margin: 0;
 }
 
 .media h1 {
@@ -155,7 +166,8 @@ hr {
 }
 
 .container {
-	margin: 0 5px;
+	margin: 0;
+	padding: 0;
 }
 
 .notice {
@@ -166,33 +178,29 @@ hr {
 }
 
 .notice .container {
-	padding: 5px;
+	margin: 0 5px;
 }
 
 
 .content {
 	background-color: #fff;
-
-	-webkit-box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
-	box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
 }
 
 .container .content {
 	padding: 5px;
 	background-color: #fff;
-	-webkit-box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
-	box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
 }
 
 .slider {
-	padding: 5px;
+	margin: 5px;
+	position: relative;
 }
 
 .follows .container {
-
+	margin: 0 5px;
+	max-width: 630px;
 }
 .follows .container .content {
-
 	background-color: #fff;
 	-webkit-box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
 	box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
@@ -214,6 +222,7 @@ hr {
 
 .uppercase {
 	text-transform: uppercase !important;
+
 }
 
 /*/
@@ -230,6 +239,7 @@ hr {
 .column {
 	display: block;
 	overflow: hidden;
+	position: relative;
 }
 
 .column div:last-child {
@@ -278,9 +288,9 @@ hr {
 
 .one-half {
 	float: left;
-	width: 48%;
-	margin-left: 1%;
-	margin-right: 1%;
+	width: 49%;
+	margin-left: 0.5%;
+	margin-right: 0.5%;
 }
 
 .one-half .btn {
@@ -315,7 +325,8 @@ hr {
 /* Button */
 
 .callsms {
-	padding-bottom: 0;
+	padding: 2pt 0;
+	height: 28px;
 }
 
 .callsms a,.callsms a:hover {
@@ -327,12 +338,12 @@ hr {
 .btn-call, .btn-sms {
 	background: transparent url(../img/callsms.png) 0 0 no-repeat;
 	height: 28px;
-	padding: 5px 0 12px 32px;
+	padding: 5pt 0 6pt 32px;
 }
 
 .btn-sms {
 	margin-left: 10px;
-	background-position: 0 -32px;
+	background-position: 0 -47px;
 }
 
 .btn-tag {
@@ -445,7 +456,7 @@ li.active .nav-sale {
 }
 
 #nav-menu > li {
-	line-height: 36px;
+	line-height: 32px;
 	margin-bottom: 0px;
 	padding-left: 0px;
 	list-style: none;
@@ -461,7 +472,7 @@ li.active .nav-sale {
 	padding-left: 18px;
 	background-repeat: no-repeat;
 	background-image: url(../img/mainMenuItemBg.png);
-	background-position: 0px -44px;
+	background-position: 0px -47px;
 }
 
 #nav-menu > li > a:hover {
@@ -528,11 +539,11 @@ li.active .nav-sale {
 	display: inline-block;
 }
 
-.carousel-control{position:absolute;top:40%;left:7px;width:40px;height:40px;margin-top:-20px;font-size:60px;font-weight:100;line-height:30px;color:#ffffff;text-align:center;background:#222222;border:3px solid #ffffff;-webkit-border-radius:23px;-moz-border-radius:23px;border-radius:23px;opacity:0.2;filter:alpha(opacity=20);}
+.carousel-control{position:absolute;top:50%;left:7px;width:40px;height:40px;margin-top:-20px;font-size:60px;font-weight:100;line-height:30px;color:#ffffff;text-align:center;background:#222222;border:3px solid #ffffff;-webkit-border-radius:23px;-moz-border-radius:23px;border-radius:23px;opacity:0.2;filter:alpha(opacity=20);}
 .carousel-control.right{left:auto;right:7px;}
 
 
-.i-email, .i-go, .price {
+.i-email, .i-go, .price, .vietnam {
 	background-image: url(../img/icon.png);
 	background-repeat: no-repeat;
 }
@@ -542,10 +553,16 @@ li.active .nav-sale {
 	position: absolute;
 	top: 5px;
 	right: 0;
-	padding: 3px 5px 5px 15px;
+	padding: 3px 5px 5px 16px;
 	color:#ffffff;
 	font-size: 10pt;
-	background-position: 0 -218px;
+	background-position: 0 -217px;
+}
+.slider .price{
+	padding: 5px 5px 5px 16px;
+}
+.price small{
+	font-size: 70%;
 }
 
 .i-email {
@@ -559,7 +576,12 @@ li.active .nav-sale {
 	height: 32px;
 	width: 32px;
 }
-
+.vietnam {
+	background-position: 0 -195px;
+	height: 16px;
+	width: 32px;
+	display:block;
+}
 #gmap {
 	border: 1px solid #d4d4d4;
 	display: block !important;
@@ -619,32 +641,54 @@ li.active .nav-sale {
 	position: absolute;
 	z-index: 8;
 	left:0;
-	bottom:0px;
-	background-color: #ffffff;
+	bottom:-15px;
 	width:100%;
 	text-align: center;
+	background-color: #fff;
 }
-.classifieds .address{
-	margin-bottom: 5px;
-	padding-top: 10px;
+.classifieds .address, .datetime{
 	font-size: 9pt;
+	color: #666;
 }
+
+.classifieds .address{
+	z-index: 7;
+	clear: both;
+	display: block;
+	margin-top: 5pt;
+	line-height: 10pt;
+	height: 19pt;
+	max-height: 27pt;
+}
+
 .classifieds .agent{
 	margin-bottom: 5px
 }
-
-.classifieds .column {
+.classifieds .agent a, .classifieds .agent span{
+	font-size: 11pt;
+}
+.classifieds .agent img{
+	width: 24px;
+	height: 24px;
+}
+.classifieds .column.content {
 	margin-bottom: 10px;
+	-webkit-box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
+	box-shadow: 0px 2px 2px rgba(0,0,0,0.2);
 }
 
 .classifieds p {
 	z-index: 100;
-	min-height: 140px;
-	margin-top: 5px;
+	height: 99pt;
+	margin-top: 5pt;
 	font-size: 10pt;
-	text-align: justify
+	line-height: 12pt;
+	text-align: left;
 }
 
+.classifieds .column.center{
+	margin-bottom: 7pt;
+}
 .classifieds .center .one-half {
 	width: 44%;
 	margin-left: 3%;
@@ -652,9 +696,12 @@ li.active .nav-sale {
 }
 
 .classifieds .center .one-half span {
+	clear: both;
 	width: 44%;
 	margin-left: 3%;
 	margin-right: 3%;
+	margin-top: -5px;
+	font-size: 8pt;
 }
 
 .classifieds .center .one-half:last-child {
@@ -679,7 +726,7 @@ li.active .nav-sale {
 }
 
 .classifieds h5 {
-	margin-bottom: -5px;
+	margin-bottom: -2pt;
 }
 
 /* Search */
@@ -713,14 +760,18 @@ li.active .nav-sale {
 	position: absolute;
 	top: 14px;
 	left: 16px;
+	color: #999;
 }
 
 /* Agents */
 .agents {
-	background-color: #ffffff;
+	margin-top: 10pt
 }
 .agents .info {
 	padding-bottom: 20px;
+}
+.agents .column{
+	margin: 0 5pt;
 }
 
 .agents .name {
@@ -738,7 +789,7 @@ li.active .nav-sale {
 
 /* Comments */
 .comments {
-	margin: 5px;
+	margin: 15pt 0 10pt 10pt;
 	padding: 0;
 }
 
@@ -783,7 +834,7 @@ li.active .nav-sale {
 /* Register */
 
 .register {
-	margin-top: 15px;
+	margin: 15pt;
 }
 
 .register .span6 {
@@ -916,6 +967,7 @@ form.sale {
 
 .messages .datetime {
 	color: #666;
+	font-style: italic;
 }
 
 .messages .datetime span:after{
@@ -925,6 +977,131 @@ form.sale {
 	content:"";
 }
 
+.like{
+	margin-bottom: 5pt;
+	padding: 5pt 0;
+}
+.like a{
+	color: #999;
+	font-size:18pt;
+	padding: 8pt 5pt;
+}
+.like a:hover{
+	text-decoration: none;
+}
+
 .group h1, .group p{
 	color: #0796a7;
+	margin: 0 0 5px 0;
+}
+.group .map-marker{
+	font-size: 14pt;
+	margin-top: 10px;
+	color: #999;
+}
+.group .map-marker .icon-key{
+	font-size: 10pt;
+}
+.group .container{
+	margin: 5px;
+	max-width: 630px;
+}
+.group h1{
+	margin: 0;
+	padding:0;
+	line-height: 20pt;
+}
+.group .message{
+	font-size: 12pt;
+	line-height: 17pt;
+	margin: 10pt 0;
+}
+.group .address{
+	margin-top: 10pt;
+}
+
+.profile {
+	position: relative;
+}
+.profile .column{
+	margin:-90pt 10px 0 10px;
+	text-align: center
+}
+.profile .name{
+	color: #fff;
+	font-size: 16pt;
+	text-shadow: 2pt 2pt 0 rgba(0, 0, 0, 0.75);
+	margin-bottom: 5pt;
+}
+.profile .info{
+	margin-top: 48pt;
+	color: #fff;
+	font-size: 12pt;
+	text-shadow: 2pt 2pt 0 rgba(0, 0, 0, 0.75);
+}
+.profile .callsms{
+	margin-top: 36pt
+}
+.profile .bio{
+	margin: 10pt auto;
+	font-style: italic;
+	font-size: 12pt;
+	text-align: center;
+	width: 80%;
+}
+
+.feed {
+	margin: 0;
+	padding: 0;
+	font-size: 10pt;
+}
+.feed .message, .feed .user {
+	margin: 5pt;
+}
+.feed .message{
+	margin-top: 7pt;
+}
+.feed .user img{
+	width: 32px;
+	height: 32px;
+	margin: 2pt 3pt;
+}
+
+.feed a{
+	font-size: 10pt;
+}
+.feed .column{
+	margin: 0;
+	padding: 0;
+}
+.feed .likeshare{
+	color: #999;
+	padding: 5pt 0;
+	margin: 0;
+	width: 180pt;
+	position: relative;
+	display: block;
+}
+
+.feed .likeshare a{
+	color: #999;
+	margin-left: 5pt;
+	padding: 5pt 8pt;
+	text-decoration: none;
+	font-size: 10pt;
+}
+
+.feed .likeshare a.active, .like a.active, .like a:active, .like a.hover, .feed .likeshare a:hover, .feed .likeshare a:active{
+	color: #ef6d1e;
+	text-decoration: none;
+}
+
+
+.feed form{
+	margin: 5px;
+	padding: 0
+}
+
+#contact{
+	margin: 10pt 0;
 }

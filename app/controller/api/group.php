@@ -1,34 +1,33 @@
 <?php
 /*
- *
- * Copyright 2013 Le Duong <du@leduong.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
- *
- *
- */
+*
+* Copyright 2013 Le Duong <du@leduong.com>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+* MA 02110-1301, USA.
+*
+*
+*/
 /**
- * Controller_Api_Group class
- *
- * @package Controller_Welcome_Index
- * @author [author] <[email]>
- * @filename {{app}}/controller/api/group.php
- * @template {{app}}/view/api/group.php
- **/
-
+* Controller_Api_Group class
+*
+* @package Controller_Welcome_Index
+* @author [author] <[email]>
+* @filename {{app}}/controller/api/group.php
+* @template {{app}}/view/api/group.php
+**/
 class Controller_Api_Group extends Controller
 {
 	public function index()
@@ -46,5 +45,27 @@ class Controller_Api_Group extends Controller
 			}
 		}
 		exit();
+	}
+	public function create(){
+		if(AJAX_REQUEST){
+			if(POST){
+				$input          = input();
+				$g              = new Model_Group();
+				$g->name        = $input->name;
+				$g->address     = $input->address;
+				$g->description = $input->description;
+				$g->map         = isset($input->map)?$input->map:'';
+				$g->slug        = string::sanitize_url($g->name);
+				$g->enable      = 0;
+				if($g->save()){
+					$group = $g->to_array();
+					$group['map'] = explode(",",$group["map"]);
+					Response::json(array('group' => $group));
+				}
+				else
+					Response::json(array('group' => array()),404);
+			}
+		}
+		exit;
 	}
 } // END class

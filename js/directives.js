@@ -11,73 +11,73 @@ angular.module('app.directives', [])
 	])
 	.directive('scrolltop', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			template: '<a href="#" class="scroll-top"><i class="icon-chevron-up"></i></a>'
 		}
 	})
 	.directive('mainnav', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/nav.html"
 		}
 	})
 	.directive('slider', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/slider.html"
 		}
 	})
 	.directive('comments', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/comments.html"
 		}
 	})
 	.directive('agent', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/agent.html"
 		}
 	})
 	.directive('notice', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/notice.html"
 		}
 	})
 	.directive('classifieds', function() {
 		return {
-			restrict: "E",
-			templateUrl: "/nhadat/html/classifieds.html"
+			restrict: "EM",
+			templateUrl: "/nhadat/html/classifieds.html",
 		}
 	})
 	.directive('follows', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/follows.html"
 		}
 	})
 	.directive('profile', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/profile.html"
 		}
 	})
 	.directive('search', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "search.html"
 		}
 	})
 	.directive('flash', function() {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			templateUrl: "/nhadat/html/flash.html"
 		}
 	})
 	.directive('mainpage', function($rootScope) {
 		return {
-			restrict: "E",
+			restrict: "EM",
 			template: '<div id="mainpage" ng-view></div>',
 			link: function(scope, elem, attrs) {
 				elem.bind('click', function() {

@@ -38,7 +38,6 @@ class Controller_Api_Topic extends Controller
 				$input = input();
 				if(isset($input->slug)) if($fetch = Model_Topic::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
 					$topic = $fetch[0]->to_array();
-					$topic['map'] = explode(",",$topic["map"]);
 					Response::json(array('topic' => $topic));
 				} else{
 					Response::json(array('topic' => array()),404);

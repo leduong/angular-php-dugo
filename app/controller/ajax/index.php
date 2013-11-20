@@ -31,13 +31,23 @@
 
 class Controller_Ajax_Index extends Controller
 {
-  public function index()
-  {
-  	if($_SERVER['REQUEST_METHOD'] == "POST"){
-  		Response::json(array('flash' => 'Ajax is OK'));
-  		exit;
-  	}
-  	else
-    $this->content = new View('ajax/index');
-  }
+	public function index()
+	{
+		if($_SERVER['REQUEST_METHOD'] == "POST"){
+			Response::json(array('flash' => 'Ajax is OK'));
+		exit;
+		}
+		else
+		$this->content = new View('ajax/index');
+	}
+
+	public function group()
+	{
+		if(AJAX_REQUEST){
+			$tpl = new Template("group/create");
+			echo $tpl->make();
+			exit;
+		}
+		else $this->content = '';
+	}
 } // END class

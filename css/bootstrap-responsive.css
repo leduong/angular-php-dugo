@@ -282,6 +282,10 @@
 	.register form input {
 		width: 85%;
 	}
+	.feed .message{
+		font-size: 10pt;
+		line-height: 12pt;
+	}
 }
 
 @media (min-width:479px) {
@@ -306,9 +310,20 @@
 
 	.classifieds .one-half p {
 		font-size: 12pt;
+		line-height: 17pt;
 	}
 
 	.classifieds .address {
 		font-size: 11pt;
+	}
+	.classifieds .info{
+		bottom:-10px;
+	}
+	.feed {
+		font-size: 12pt;
+	}
+	.feed .message{
+		font-size: 12pt;
+		line-height: 17pt;
 	}
 }

@@ -20,10 +20,11 @@ class Controller_Admin_User extends Controller
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
-		$limit=100;
-		$page=((int)get('page')>1)?(int)get('page'):1;
-		$offset=$limit*($page-1);
-		$total = Model_User::count();
+		$limit  = $this->appsite['limit_per_page'];
+		$page   = ((int)get('page')>1)?(int)get('page'):1;
+		$offset = $limit*($page-1);
+		$sort   = array('id' => 'DESC');
+		$total  = Model_User::count();
 
 		$this->content = new View('user');
 		$this->content->message = $this->content->form = NULL;

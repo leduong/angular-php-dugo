@@ -23,10 +23,10 @@ class Controller_Admin_Zipcode extends Controller
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
-		$limit=$this->appsite['limit_per_page'];
-		$page=((int)get('page')>1)?(int)get('page'):1;
-		$offset=$limit*($page-1);
-		$total = Model_Zipcode::count();
+		$limit  = $this->appsite['limit_per_page'];
+		$page   = ((int)get('page')>1)?(int)get('page'):1;
+		$offset = $limit*($page-1);
+		$total  = Model_Zipcode::count();
 
 		$this->content = new View('zipcode');
 		$this->content->message = $this->content->form = NULL;

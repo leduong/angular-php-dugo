@@ -35,13 +35,13 @@ class Controller_Search_Index extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$array = array();
-				$limit=10;
-				$page=((int)get('page')>1)?(int)get('page'):1;
-				$offset=$limit*($page-1);
-				$input = input();
+				$array    = array();
+				$limit    =10;
+				$page     =((int)get('page')>1)?(int)get('page'):1;
+				$offset   =$limit*($page-1);
+				$input    = input();
 				$keywords = explode(",", $input->keyword);
-				$query = '';
+				$query    = '';
 
 				foreach ($keywords as $k) {
 					$slug = string::slug($k);
@@ -51,6 +51,7 @@ class Controller_Search_Index extends Controller
 					$query .= "OR slug LIKE '%$slug%'";
 				}
 				$query = trim($query,"OR");
+
 				if ($fetch=Model_Tags::fetch(array("$query"),$limit,$offset)){
 					foreach ($fetch as $f) {
 						$f->load();
@@ -66,7 +67,7 @@ class Controller_Search_Index extends Controller
 							}
 							$array[]= array(
 								'title' => $f->name,
-								'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=320&h=320&t=m&src='.$m->value:'/uploads/media/3.jpg',
+								'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=320&h=320&t=m&src='.$m->value:'/uploads/media/default.png',
 								'tag' => $tag,
 								'meta' => $meta,
 								'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
@@ -97,9 +98,11 @@ class Controller_Search_Index extends Controller
 		$limit    =10;
 		$page     =((int)get('page')>1)?(int)get('page'):1;
 		$offset   =$limit*($page-1);
+		$input    = input();
+		$where    = (isset($input->search))?(array) $input->search:array();
 
 		$array = array();
-		if ($fetch=Model_Messages::fetch(array(),$limit,$offset,array('id' => 'DESC'))){
+		if ($fetch=Model_Messages::fetch($where,$limit,$offset,array('id' => 'DESC'))){
 			foreach ($fetch as $m) {
 				$u = new Model_User($m->uid);
 				$tag = $meta = array();
@@ -110,17 +113,18 @@ class Controller_Search_Index extends Controller
 					$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
 				}
 				$array[]= array(
-					'id' => $m->id,
-					'title' => '',
-					'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=320&h=320&t=m&src='.$m->value:'/uploads/media/3.jpg',
-					'tag' => $tag,
+					'id'   => $m->id,
+					'type' => $m->type,
+					'time' => $m->time,
+					'img'  => ($m->value)?$m->value:'default.png',
+					'tag'  => $tag,
 					'meta' => $meta,
 					'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
 					'user' => array(
 						'username' => $u->username,
-						'name' => $u->first_name." ".$u->last_name,
-						'avatar' => "http://www.gravatar.com/avatar/".md5($u->email)."?s=20&d=wavatar&r=g",
-						'phone' => $u->phone,
+						'name'     => $u->first_name." ".$u->last_name,
+						'image'    => $u->image,
+						'phone'    => $u->phone,
 						),
 				);
 			}
@@ -172,8 +176,12 @@ class Controller_Search_Index extends Controller
 		if(AJAX_REQUEST){
 			$array = array();
 			if(POST){
-				$request = input();
+				$input = input();
 				$keyword = string::slug($input->keyword);
+
+				$fetch = Model_Group::fetch(array("slug LIKE '%$keyword%'"),8);
+				if ($fetch)foreach ($fetch as $f) $array[]=$f->name;
+				// Zipcode
 				$fetch = Model_Zipcode::fetch(array("slug LIKE '%$keyword%'"),8);
 				if ($fetch){
 					foreach ($fetch as $f) {
@@ -186,39 +194,5 @@ class Controller_Search_Index extends Controller
 			Response::json($array);
 			exit();
 		}
-	}
-	public function slider(){
-		$limit    =10;
-		$page     =((int)get('page')>1)?(int)get('page'):1;
-		$offset   =$limit*($page-1);
-
-		$array = array();
-		if ($fetch=Model_Messages::fetch(array(),$limit,$offset,array('id' => 'DESC'))){
-			foreach ($fetch as $m) {
-				$u = new Model_User($m->uid);
-				$tag = $meta = array();
-				foreach (array_slice(explode(',',$m->tag),0,2) as $v) {
-					$tag[string::slug($v)] = trim($v);
-				}
-				if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
-					$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
-				}
-				$array[]= array(
-					'title' => '',
-					'img' => ($m->type=='picture')?'http://192.241.221.27:8080/thumb.php?w=650&h=650&t=m&src='.$m->value:'/uploads/media/3.jpg',
-					'tag' => $tag,
-					'meta' => $meta,
-					'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
-					'user' => array(
-						'username' => $u->username,
-						'name' => $u->first_name." ".$u->last_name,
-						'avatar' => "http://www.gravatar.com/avatar/".md5($u->email)."?s=20&d=wavatar&r=g",
-						'phone' => $u->phone,
-						),
-				);
-			}
-		}
-		Response::json($array);
-		exit;
 	}
 } // END class

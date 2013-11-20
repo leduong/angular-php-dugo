@@ -33,3 +33,21 @@
 	};
 	$(document).ready(onReady.init);
 })(jQuery);
+
+function tienVND(s) {
+	var lv = new Array(' ', '.000', ' TR', ' TỈ', '.000 TỈ');
+	s = parseInt(s);
+	if (s < 100000) {
+		if (s>1000){
+			s /= 1000;
+		}
+
+	} else {
+		for (var i = 0; s >= 1000; i++) s /= 1000;
+		if (s) return s + lv[i];
+	}
+
+	for (var i = 0; s >= 1000; i++) s /= 1000;
+	if (s) return s + lv[i];
+	return '';
+}

@@ -33,11 +33,63 @@ class Controller_Profile_Index extends Controller
 {
   public function index()
   {
-  	if($_SERVER['REQUEST_METHOD'] == "POST"){
-  		Response::json(array('flash' => 'Profile is OK'));
-  		exit;
-  	}
-  	else
-    $this->content = new View('profile/index');
+  	if(AJAX_REQUEST){
+  		if(POST){
+  			$input = input();
+			if(isset($input->id)&&is_numeric($input->id)){
+				$user = new Model_User($input->id);
+			} else {
+				$user = Model_User::fetch(array(
+					'username' => str_replace('.html','',$input->username),1
+				));
+				$user = end($user);
+			}
+
+			if($user){
+				$slider     = array();
+				$where      = array('uid' => $user->idu, 'type' => 'realestate');
+				$status     = Model_Messages::count(array('uid' => $user->idu, 'type' => 'status'));
+				$realestate = Model_Messages::count($where);
+				if ($fetch=Model_Messages::fetch($where, 10, 0, array('id' => 'DESC'))){
+					foreach ($fetch as $m) {
+						$tag = $meta = array();
+						foreach (array_slice(explode(',',$m->tag),0,2) as $v) {
+							$tag[string::slug($v)] = trim($v);
+						}
+						if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
+							$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
+						}
+						$slider[]= array(
+							'img'  => ($m->value)?$m->value:'default.png',
+							'tag'  => $tag,
+							'meta' => $meta,
+							'text' => mb_convert_case($m->message, MB_CASE_TITLE, "UTF-8"),
+							'user' => array(
+								'username' => $user->username,
+								'name'     => $user->first_name." ".$user->last_name,
+								'image'    => $user->image,
+								'phone'    => $user->phone,
+								),
+						);
+					}
+				}
+				Response::json(array(
+						'user'   => $user->to_array(),
+						'slider' => $slider,
+						'stats'  => array(
+							'status'     => $status,
+							'realestate' => $realestate
+							),
+						)
+					);
+			} else{
+				Response::json(array(),404);
+			}
+  		} else {
+			$tpl = new Template("profile/index");
+			echo $tpl->make();
+  		}
+		exit;
+	} else $this->content = '';
   }
 } // END class

@@ -23,14 +23,14 @@ class Controller_Admin_Tags extends Controller
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
-		$limit=$this->appsite['limit_per_page'];
-		$page=((int)get('page')>1)?(int)get('page'):1;
-		$offset=$limit*($page-1);
-		$total = Model_Tags::count();
+		$limit  =$this->appsite['limit_per_page'];
+		$page   =((int)get('page')>1)?(int)get('page'):1;
+		$offset =$limit*($page-1);
+		$total  = Model_Tags::count();
 
-		$this->content = new View('tags');
+		$this->content          = new View('tags');
 		$this->content->message = $this->content->form = NULL;
-		$this->content->page = $page;
+		$this->content->page    = $page;
 
 		$pagination = new Pagination(
 			$total,
