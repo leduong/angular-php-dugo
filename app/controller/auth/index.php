@@ -33,8 +33,30 @@ class Controller_Auth_Index extends Controller
 {
 	public function index()
 	{
-		Response::json(array(), 403);
+		$a = get("v");
+		echo '<meta charset="utf-8"><meta http-equiv="refresh" content="1; url=http://www.nhadat.com/newpassword.html">';
+		$txt = 'window.setTimeout(location.href = "http://www.nhadat.com/newpassword.html",1000);';
+		if($b = Cache::get($a)){
+			$auth = new Model_User($b);
+			if ($auth->idu){
+					if ($auth->verified=='0') {
+						$auth->verified = 1;
+						$auth->save();
+					}
+					$user = array();
+					foreach((array)$auth->to_array() as $k => $v) if ($k != 'password') $user[$k] = trim($v);
+					cookie::set('user',serialize($user));
+			}
+			$txt .= "var user = JSON.stringify(".json_encode($user).");\n";
+			$txt .= "localStorage.setItem('user', user);\n";
+			$txt .= "alert('Bấm Ok để chỉ định mật khẩu mới. Xin cám ơn.');";
+		}
+		echo "<script>$txt</script>";
 		exit;
+	}
+
+	public function verify(){
+
 	}
 
 	public function login()

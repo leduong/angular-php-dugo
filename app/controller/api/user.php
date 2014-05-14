@@ -49,7 +49,9 @@ class Controller_Api_User extends Controller
 					$user->otp     = $rand;
 					$user->disable = '1';
 					$user->save();
-					$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand));
+					$code = substr(md5($user->idu), 1, 8);
+					Cache::set($code,$user->idu,600);
+					$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand, $code));
 					$sendsms = file_get_contents("http://center.fibosms.com/Service.asmx/SendSMS?&clientNo=CL8852&clientPass=28mCDiad&smsGUID=".uuid()."&serviceType=1&phoneNumber=$phone&smsMessage=$sms");
 					@log_message("$phone - $sms - $sendsms");
 					//die();
@@ -164,21 +166,29 @@ class Controller_Api_User extends Controller
 			else {
 				$rand = rand(1000,9999);
 				if (preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $u)) {
-					if ($this->appsite['email_body']){
-						$message = sprintf($this->appsite['email_body'], $rand);
-						$mail = new Mail();
-						$mail->setTo($u);
-						$mail->setFrom($this->appsite['email']);
-						$mail->setSender($this->appsite['domain']);
-						$mail->setSubject(sprintf($this->appsite['email_subject'], $rand));
-						$mail->setText(strip_tags(html_entity_decode($message, ENT_QUOTES, 'UTF-8')));
-						$mail->send();
-					}
 					$user        = new Model_User();
 					$user->email = strtolower($u);
 					$user->otp   = $rand;
 					$user->save();
-					Response::json(array('user' => 'email'), 404);
+
+					$code = substr(md5($user->idu), 1, 8);
+					Cache::set($code,$user->idu,600);
+
+					if ($this->appsite['email_body']){
+						$message = sprintf($this->appsite['email_body'], $rand, $code);
+						$mail = new Mail();
+						$mail->setTo($u);
+						$mail->setFrom($this->appsite['email']);
+						$mail->setSender($this->appsite['domain']);
+						$mail->setSubject(sprintf($this->appsite['email_subject'],$rand));
+						$mail->setText(strip_tags(html_entity_decode($message, ENT_QUOTES, 'UTF-8')));
+						$mail->send();
+					}
+
+					Response::json(array(
+						'user' => 'email',
+						'flash' => 'Vui lòng kiểm tra e-mail "'.strtolower($u).'".'), 404);
+					exit;
 				} elseif (is_numeric($phone)&&vnphone($phone)){
 					$user_exist = Model_User::fetch(array('phone' => $phone),1);
 					if ($user_exist){
@@ -191,7 +201,9 @@ class Controller_Api_User extends Controller
 						$user->otp   = $rand;
 						$user->save();
 					}
-					$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand));
+					$code = substr(md5($user->idu), 1, 8);
+					Cache::set($code,$user->idu,600);
+					$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand, $code));
 					$sendsms = @file_get_contents("http://center.fibosms.com/Service.asmx/SendSMS?&clientNo=CL8852&clientPass=28mCDiad&smsGUID=".uuid()."&serviceType=1&phoneNumber=$phone&smsMessage=$sms");
 					@log_message("$phone - $sms - $sendsms");
 					Response::json(array(
@@ -320,16 +332,6 @@ class Controller_Api_User extends Controller
 				$phone = numify($in->user);
 				$rand = rand(1000,9999);
 				if (preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $in->user)) {
-					if ($this->appsite['email_body']){
-						$message = sprintf($this->appsite['email_resetpw'], $rand);
-						$mail = new Mail();
-						$mail->setTo($in->user);
-						$mail->setFrom($this->appsite['email']);
-						$mail->setSender($this->appsite['domain']);
-						$mail->setSubject(sprintf($this->appsite['email_subject'], $rand));
-						$mail->setText(strip_tags(html_entity_decode($message, ENT_QUOTES, 'UTF-8')));
-						$mail->send();
-					}
 
 					$user = Model_User::fetch(array('email' => $in->user),1);
 					if ($user){
@@ -341,6 +343,21 @@ class Controller_Api_User extends Controller
 					$user->otp      = $rand;
 					$user->password = NULL;
 					$user->save();
+					$code = substr(md5($user->idu), 1, 8);
+					Cache::set($code,$user->idu,600);
+					if ($this->appsite['email_body']){
+						$message = sprintf($this->appsite['email_body'], $rand, $code);
+						$mail = new Mail();
+						$mail->setTo($in->user);
+						$mail->setFrom($this->appsite['email']);
+						$mail->setSender($this->appsite['domain']);
+						$mail->setSubject(sprintf($this->appsite['email_subject'], $rand));
+						$mail->setText(strip_tags(html_entity_decode($message, ENT_QUOTES, 'UTF-8')));
+						$mail->send();
+					}
+
+
+
 					Response::json(array('flash' => 'Mật khẩu mới đã được gởi đến "'.$in->user.'" và chỉ có hiệu lực trong vòng 10 phút.'));
 				} elseif (vnphone($phone)) {
 					$check = Cache::get("phone".$phone);
@@ -357,8 +374,11 @@ class Controller_Api_User extends Controller
 						$user->otp      = $rand;
 						$user->password = NULL;
 						$user->save();
+						$code = substr(md5($user->idu), 1, 8);
+						Cache::set($code,$user->idu,600);
+						$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand, $code));
+
 						Response::json(array('flash' => 'Mật khẩu mới đã được gởi đến "'.$in->user.'" và chỉ có hiệu lực trong vòng 10 phút.'));
-						$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand));
 						$sendsms = file_get_contents("http://center.fibosms.com/Service.asmx/SendSMS?&clientNo=CL8852&clientPass=28mCDiad&smsGUID=".uuid()."&serviceType=1&phoneNumber=$phone&smsMessage=$sms");
 						@log_message("$phone - $sms - $sendsms");
 						Cache::set("phone".$phone,true,600);
