@@ -36,7 +36,7 @@ class Controller_Api_Topic extends Controller
 		if(AJAX_REQUEST){
 			if(POST){
 				$input = input();
-				if(isset($input->slug)) if($fetch = Model_Topic::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
+				if(isset($input->slug)) if($fetch = Model_Tags::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
 					$topic = $fetch[0]->to_array();
 					Response::json(array('topic' => $topic));
 				} else{

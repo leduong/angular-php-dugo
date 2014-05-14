@@ -36,12 +36,12 @@ class Controller_Sale_Index extends Controller
     if(AJAX_REQUEST){
 			if(POST){
 			}else{
-				$tpl = new Template("sale/index");
+				$tpl = new Template("sale");
 				echo $tpl->make();
 			}
 			exit;
 		}
 		else
-			$this->content = new View('sale/index');
+			$this->content = new View('sale');
   }
 } // END class

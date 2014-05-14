@@ -272,16 +272,9 @@
 		position: static;
 	}
 
-	.register form input {
-		width: 94%;
-	}
-
 }
 
 @media (max-width:360px) {
-	.register form input {
-		width: 85%;
-	}
 	.feed .message{
 		font-size: 10pt;
 		line-height: 12pt;
@@ -289,6 +282,9 @@
 }
 
 @media (min-width:479px) {
+	header .nhadat {
+		padding-left: 20px;
+	}
 	.one-half:first-child {
 		float: left;
 		width: 32%;

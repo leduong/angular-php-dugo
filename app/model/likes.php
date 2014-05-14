@@ -43,9 +43,7 @@ UNIQUE KEY `id` (`id`)
  * @package default
  * @author
  **/
-class Model_Likes extends ORM
+class Model_Likes extends APCORM
 {
 	public static $t = 'likes';
-	public static $f = 'by'; // FOREIGN KEY
-	public static $h = array('user' => 'Model_User');
 } // END class

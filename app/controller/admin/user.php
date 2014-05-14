@@ -1,4 +1,19 @@
 <?php
+function array2csv(array &$array)
+{
+   if (count($array) == 0) {
+     return null;
+   }
+   ob_start();
+   $df = fopen("php://output", 'w');
+   fputcsv($df, array_keys(reset($array)));
+   foreach ($array as $row) {
+      fputcsv($df, $row);
+   }
+   fclose($df);
+   return ob_get_clean();
+}
+
 class Controller_Admin_User extends Controller
 {
 	public function index()
@@ -17,14 +32,101 @@ class Controller_Admin_User extends Controller
 		}
 		redirect(HTTP_SERVER.'/admin/user/lists');
 	}
+	public function verified()
+	{
+		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
+		$where  = array("disable" => '0', "verified" => "1");
+		$total  = Model_User::count($where);
+		$users = Model_User::fetch($where);
+		$ar = array();
+		$ar[] = array(
+			"ID",
+			"Name",
+			"Email",
+			"Phone",
+			"Dia danh",
+			"Rao dang",
+			"Trao doi"
+			);
+		foreach ($users as $a) {
+			$ar[] = array(
+				$a->idu,
+				$a->first_name . ' ' . $a->last_name,
+				$a->email,
+				$a->phone,
+				Model_Group::count(array('by' => $a->idu)),
+				Model_Messages::count(array('uid' => $a->idu, 'type' => 'realestate')),
+				Model_Messages::count(array('uid' => $a->idu, 'type' => 'status'))
+			);
+		}
+
+		$now = date("D, d M Y H:i:s");
+	    header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+	    header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+	    header("Last-Modified: {$now} GMT");
+
+	    header("Content-Type: application/force-download");
+	    header("Content-Type: application/octet-stream");
+	    header("Content-Type: application/download");
+
+	    // disposition / encoding on response body
+	    header("Content-Disposition: attachment;filename=verified.csv");
+	    header("Content-Transfer-Encoding: binary");
+	    echo array2csv($ar);
+	    die();
+	}
+	public function unverified()
+	{
+		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
+		$where  = array("disable" => '0', "verified" => "0");
+		$total  = Model_User::count($where);
+		$users = Model_User::fetch($where);
+		$ar = array();
+		$ar[] = array(
+			"ID",
+			"Name",
+			"Email",
+			"Phone",
+			"Dia danh",
+			"Rao dang",
+			"Trao doi"
+			);
+		foreach ($users as $a) {
+			$ar[] = array(
+				$a->idu,
+				$a->first_name . ' ' . $a->last_name,
+				$a->email,
+				$a->phone,
+				0,
+				0,
+				0
+			);
+		}
+
+		$now = date("D, d M Y H:i:s");
+	    header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+	    header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+	    header("Last-Modified: {$now} GMT");
+
+	    header("Content-Type: application/force-download");
+	    header("Content-Type: application/octet-stream");
+	    header("Content-Type: application/download");
+
+	    // disposition / encoding on response body
+	    header("Content-Disposition: attachment;filename=unverified.csv");
+	    header("Content-Transfer-Encoding: binary");
+	    echo array2csv($ar);
+	    die();
+	}
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$limit  = $this->appsite['limit_per_page'];
 		$page   = ((int)get('page')>1)?(int)get('page'):1;
 		$offset = $limit*($page-1);
-		$sort   = array('id' => 'DESC');
-		$total  = Model_User::count();
+		$sort   = array('idu' => 'DESC');
+		$where  = array("disable" => '0');
+		$total  = Model_User::count($where);
 
 		$this->content = new View('user');
 		$this->content->message = $this->content->form = NULL;
@@ -34,7 +136,7 @@ class Controller_Admin_User extends Controller
 		$pagination->attributes = array(
 			'class' => 'dataTables_paginate paging_bootstrap pagination'
 		);
-		$this->content->users = Model_User::fetch(NULL,$limit,$offset,array('username' => 'ASC'));
+		$this->content->users = Model_User::fetch($where,$limit,$offset,$sort);
 		$this->content->pagination = $pagination;
 	}
 	public function create()
@@ -42,14 +144,13 @@ class Controller_Admin_User extends Controller
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('user_create');
 		$this->content->message = NULL;
-		$rules = array(
-		'email' => 'required|valid_email|max_length[128]');
+		$rules = array();
 		$fields = array(
-			'username' => array('required' => '*', 'div' => array('class' => 'control-group')),
-			'email' => array('required' => '*', 'description' => lang('required_valid_email'), 'div' => array('class' => 'control-group')),
-			'password' => array('required' => '*', 'type' => 'password', 'div' => array('class' => 'control-group')),
-			'first_name' => array('required' => '*', 'div' => array('class' => 'control-group')),
-			'last_name' => array('required' => '*', 'div' => array('class' => 'control-group')),
+			'username' => array('div' => array('class' => 'control-group')),
+			'email' => array('div' => array('class' => 'control-group')),
+			'password' => array('type' => 'password', 'div' => array('class' => 'control-group')),
+			'first_name' => array('div' => array('class' => 'control-group')),
+			'last_name' => array('div' => array('class' => 'control-group')),
 			'phone' => array('div' => array('class' => 'control-group')),
 			'website' => array('div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('register'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
@@ -103,7 +204,6 @@ class Controller_Admin_User extends Controller
 		$this->content = new View('user_form');
 		$this->content->message = NULL;
 		$rules = array(
-			'email' => 'required|valid_email|max_length[128]'
 		);
 
 		$validation = new Validation();
@@ -136,11 +236,11 @@ class Controller_Admin_User extends Controller
 		$c = new Model_User(get('edit'));
 		$fields = array(
 			'key' => array('type' => 'hidden', 'value' => $c->idu, 'div' => array('class' => 'control-group')),
-			'username' => array('required' => '*', 'value' => $c->username, 'div' => array('class' => 'control-group')),
-			'email' => array('required' => '*', 'value' => $c->email, 'div' => array('class' => 'control-group')),
+			'username' => array('value' => $c->username, 'div' => array('class' => 'control-group')),
+			'email' => array('value' => $c->email, 'div' => array('class' => 'control-group')),
 			'password' => array('type' => 'password', 'description' => lang('blank_is_no_change'), 'div' => array('class' => 'control-group')),
-			'first_name' => array('required' => '*', 'value' => $c->first_name, 'div' => array('class' => 'control-group')),
-			'last_name' => array('required' => '*', 'value' => $c->last_name, 'div' => array('class' => 'control-group')),
+			'first_name' => array('value' => $c->first_name, 'div' => array('class' => 'control-group')),
+			'last_name' => array('value' => $c->last_name, 'div' => array('class' => 'control-group')),
 			'phone' => array('value' => $c->phone, 'div' => array('class' => 'control-group')),
 			'website' => array('value' => $c->website, 'div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))

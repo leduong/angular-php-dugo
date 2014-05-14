@@ -34,13 +34,13 @@ class Controller_Contact_Index extends Controller
   public function index() {
 		if(AJAX_REQUEST){
 			if(POST){
-				$Input = input();
+				$in = input();
 				$message = sprintf("Họ tên: %s\nEmail: %s\nĐịa chỉ: %s\nĐiện thoại: %s\n\nNội dung:\n%s\n\n\n--\n%s",
-					$Input->full_name,
-					$Input->email,
-					$Input->address,
-					$Input->phone,
-					$Input->message,
+					$in->full_name,
+					$in->email,
+					$in->address,
+					$in->phone,
+					$in->message,
 					DOMAIN);
 				$mail = new Mail();
 				if(is_array($smtp)){
@@ -50,15 +50,15 @@ class Controller_Contact_Index extends Controller
 					$mail->password = $smtp['smtp_password'];
 				}
 				$mail->setTo($this->appsite['email']);
-				$mail->setFrom($Input->email);
-				$mail->setSender($Input->full_name);
-				$mail->setSubject(sprintf('Liên hệ: %s gởi thông tin từ website.', $Input->full_name));
-				$mail->setText(html_entity_decode($Input->message, ENT_QUOTES, 'UTF-8'));
+				$mail->setFrom($in->email);
+				$mail->setSender($in->full_name);
+				$mail->setSubject(sprintf('Liên hệ: %s gởi thông tin từ website.', $in->full_name));
+				$mail->setText(html_entity_decode($in->message, ENT_QUOTES, 'UTF-8'));
 				$mail->send();
 				Response::json(array('flash' => 'sent'));
 			}
 			else{
-				$tpl = new Template("contact/index");
+				$tpl = new Template("contact");
 				echo $tpl->make();
 			}
 			exit;

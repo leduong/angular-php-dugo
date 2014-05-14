@@ -1,7 +1,7 @@
 @media all and (-webkit-min-device-pixel-ratio:2) {
 	.nav-menu, .nav-search, .nav-sale, .nav-msg {
 		background-image:url(../img/nhadat@2x.png);
-		-webkit-background-size:180px 90px;
+		-webkit-background-size:180px 100px;
 	}
 	.btn-call, .btn-sms{
 		background-image:url(../img/callsms@2x.png);

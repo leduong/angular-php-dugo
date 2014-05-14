@@ -25,20 +25,42 @@ class Controller_Api_Like extends Controller
 {
 	public function create()
 	{
-		if(AJAX_REQUEST){
-			if(POST){
-				$input = input();
-				$u     = unserialize(cookie::get('user'));
-				if(($u['idu'])&&isset($input->like)){
-					$like       = new Model_Likes();
-					$like->by   = $u['idu'];
-					$like->post = $input->like;
-					$like->save();
-					$total = Model_Likes::count(array('post' => $input->like));
-					Response::json(array('total' => $total));
+		if(AJAX_REQUEST&&POST){
+			$in = input();
+			$u = unserialize(cookie::get('user'));// Check User via Cookie
+			if (isset($in->like)){
+				$id = $in->like;
+				if (int($id)) {
+					$msg = new Model_Messages($id);
+				} else {
+					$msg = Model_Messages::fetch(array('link' => $id),1);
+					$msg = end($msg);
 				}
-				else Response::json(array('total' => 0), 403);
+				$total = Model_Likes::count(array('msg_id' => $msg->id));
+				if(isset($u['idu'])&&(int)$u['idu']){
+					if($liked = Model_Likes::fetch(array('by' => $u['idu'], 'msg_id' => $msg->id),1)){
+						$like = end($liked);
+						$like->delete();
+						// update likes
+						$msg->likes = $total-1;
+						$msg->save();
+						Response::json(array('like' => False, 'total' => $total-1));
+					}
+					else {
+						$like         = new Model_Likes();
+						$like->by     = $u['idu'];
+						$like->msg_id = $msg->id;
+						$like->save();
+						// update likes
+						$msg->likes = $total+1;
+						$msg->save();
+						Response::json(array('like' => True, 'total' => $total+1));
+					}
+				}
+				else Response::json(array(), 403);
 			}
+			// Return 0
+			else Response::json(array(), 403);
 		}
 		exit;
 	}
@@ -48,55 +70,17 @@ class Controller_Api_Like extends Controller
 		if(AJAX_REQUEST){
 			if(POST){
 				$input = input();
-				$like = new Model_Likes($input->id);
-				if ($like){
-					Response::json(array(
-						'flash' => 'success',
-						'like' => $like->to_array(),
-					));
-				} else{
-					Response::json(array('flash' => 'not_found'),404);
-				}
-			}
-		}
-		exit;
-	}
-
-	public function update()
-	{
-		if(AJAX_REQUEST){
-			if(POST){
-				$input = input();
-				$like = new Model_Likes($input->id);
-				if ($cmt){
-					foreach ((array)$input as $key => $value) {
-						$like->$key = (isset($like->$key)&&($like->$key!=$value))?$value:$like->$key;
+				if (isset($input->like)){
+					// Cache :: Total
+					$total = Cache::get('like'.md5($input->like));
+					if(!$total){
+						$total = Model_Likes::count(array('msg_id' => $input->like));
+						Cache::set('like'.md5($input->like),$total);
 					}
-					$like->save();
-					Response::json(array(
-						'flash' => 'success',
-						'like' => $like->to_array(),
-					));
-				} else{
-					Response::json(array('flash' => 'not_found'),404);
+					else Response::json(array('total' => $total));
 				}
-			}
-		}
-		exit;
-	}
-
-	public function destroy()
-	{
-		if(AJAX_REQUEST){
-			if(POST){
-				$input = input();
-				$like = new Model_Likes($input->id);
-				if ($like){
-					$like->delete();
-					Response::json(array('flash' => 'success'));
-				} else{
-					Response::json(array('flash' => 'not_found'),404);
-				}
+				// Return Not Found
+				else Response::json(array('error' => 404), 404);
 			}
 		}
 		exit;

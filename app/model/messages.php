@@ -30,17 +30,17 @@
 --
 
 CREATE TABLE IF NOT EXISTS `messages` (
-  `id` int(12) NOT NULL AUTO_INCREMENT,
-  `uid` int(32) NOT NULL,
-  `message` text COLLATE utf8_unicode_ci NOT NULL,
-  `tag` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `type` varchar(16) CHARACTER SET latin1 NOT NULL,
-  `value` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `public` int(11) NOT NULL,
-  `likes` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id` (`id`)
+	`id` int(12) NOT NULL AUTO_INCREMENT,
+	`uid` int(32) NOT NULL,
+	`message` text COLLATE utf8_unicode_ci NOT NULL,
+	`tag` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+	`type` varchar(16) CHARACTER SET latin1 NOT NULL,
+	`value` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
+	`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`public` int(11) NOT NULL,
+	`likes` int(11) NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
 
 ***/
@@ -52,10 +52,51 @@ CREATE TABLE IF NOT EXISTS `messages` (
  * @package default
  * @author
  **/
-class Model_Messages extends ORM
+class Model_Messages extends APCORM
 {
-  public static $t = 'messages'; // Table
-  public static $k = 'id'; // Default 'id' , PRIMARY KEY AUTO_INCREMENT
+	public static $t = 'messages'; // Table
+	public static $k = 'id'; // Default 'id' , PRIMARY KEY AUTO_INCREMENT
+	public static $f = 'msg_id'; // FOREIGN KEY
 
-  //public static $h = array(); // Relations Ship
+	public static $h = array(
+		'like'       => 'Model_Likes',
+		'meta'       => 'Model_MessagesMeta',
+		'comments'   => 'Model_Comments',
+		'occurrence' => 'Model_TagsOccurrence'
+		); // Relations Ship
+	//public static $h = array(); // Relations Ship
+	public static function rebuild($id=0)
+	{
+		$meta = $arr = array();
+		$m = new Model_Messages($id);
+		if ($m){
+			// Tags
+			$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
+			if ($mt) foreach($mt as $v) $meta[$v->type] = trim($v->value);
+			if (isset($meta["local"])){
+				if($ar = @explode(',',$meta["local"])) while (count($ar)>0) {
+					$arr[string::slug(implode(",", $ar))] = trim($ar[0]);
+					$ar = array_slice($ar, 1);
+				}
+			}
+			if(isset($arr)){
+				if($tags = @explode(',',$m->tag)) foreach ($tags as $t) $arr[string::slug($t)] = trim($t);
+				$del = Model_TagsOccurrence::fetch(array('msg_id' => $m->id));
+				if ($del) foreach ($del as $d) $d->delete();
+				foreach ($arr as $key => $value) {
+					$tag_id = Model_Tags::get_or_insert($value,$key);
+					if ($tag_id){
+						$count = Model_TagsOccurrence::count(array('msg_id' => $m->id, 'tag_id' => $tag_id));
+						if ($count<1){
+							$tags_occurrence         = new Model_TagsOccurrence();
+							$tags_occurrence->msg_id = $m->id;
+							$tags_occurrence->tag_id = $tag_id;
+							$tags_occurrence->save();
+						}
+					}
+				}
+			}
+			// end Tags
+		}
+	}
 } // END class

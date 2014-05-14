@@ -27,23 +27,43 @@ class Controller_Api_Comment extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$u = unserialize(cookie::get('user'));
-				$user = new Model_User($u['idu']);
-				if($user){ // If exist User
-					$input = input();
-					$comment = new Model_Comments();
-					$comment->uid = $u['idu'];
-					foreach ((array)$input as $key => $value) {
-			            $comment->$key = (isset($comment->$key)&&($comment->$key!=$value))?$value:$comment->$key;
-		            }
-					$comment->save();
-					Response::json(array(
-						'flash' => 'successful',
-						'comment' => $comment->to_array()
-					));
-				} else {
-					Response::json(array('flash' => 'permission_denied'),403);
+				$in = input();
+				if (isset($in->msg_id)){
+					$id = $in->msg_id;
+					if (int($id)) {
+						$msg = new Model_Messages($id);
+					} else {
+						$msg = Model_Messages::fetch(array('link' => $id),1);
+						$msg = end($msg);
+					}
+					$total = Model_Comments::count(array('msg_id' => $msg->id));
+
+					// Check User via Cookie
+					$user = unserialize(cookie::get('user'));
+					if(isset($user['idu'])&&(int)$user['idu']&&(isset($in->comment))){
+						$by = new Model_User($user['idu']);
+						if ($by){
+							$c          = new Model_Comments();
+							$c->by      = $user['idu'];
+							$c->msg_id  = $msg->id;
+							$c->message = $in->comment;
+							$c->save();
+							//update comments
+							$msg->comments = $total+1;
+							$msg->save();
+
+							Response::json(array(
+								'comment'  => nl2br($c->message),
+								'time'     => Time::show(time()),
+								'name'     => $by->first_name,
+								'location' => '',
+								));
+						}
+					}
+					else Response::json(array('total' => $total), 403);
 				}
+				// Return 0
+				else Response::json(array('total' => 0), 403);
 			}
 		}
 		exit;

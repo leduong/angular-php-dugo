@@ -34,5 +34,10 @@ class Controller_Common_404 extends Controller
   public function index()
   {
     //$this->content = new View('common/404');
+    if(AJAX_REQUEST){
+  		$tpl = new Template("index");
+		echo $tpl->make();
+		exit;
+  	} else $this->content = '';
   }
 } // END class

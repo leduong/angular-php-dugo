@@ -36,12 +36,12 @@ class Controller_Profile_Index extends Controller
   	if(AJAX_REQUEST){
   		if(POST){
   			$input = input();
-			if(isset($input->id)&&is_numeric($input->id)){
-				$user = new Model_User($input->id);
+  			if (isset($input->username)) $username = str_replace('.html','',$input->username);
+  			
+			if(isset($username)&&is_numeric($username)){
+				$user = new Model_User($username);
 			} else {
-				$user = Model_User::fetch(array(
-					'username' => str_replace('.html','',$input->username),1
-				));
+				$user = Model_User::fetch(array('username' => $username),1);
 				$user = end($user);
 			}
 
@@ -86,7 +86,7 @@ class Controller_Profile_Index extends Controller
 				Response::json(array(),404);
 			}
   		} else {
-			$tpl = new Template("profile/index");
+			$tpl = new Template("profile");
 			echo $tpl->make();
   		}
 		exit;

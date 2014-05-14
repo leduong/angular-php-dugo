@@ -23,73 +23,143 @@
 
 class Controller_Api_Message extends Controller
 {
+	public function tags()
+	{
+		if(AJAX_REQUEST && POST){
+			$in     = input();
+			$limit  = 10;
+			$page   = (isset($in->page)&&((int)$in->page>1))?(int)$in->page:1;
+			$offset = $limit * ($page-1);
+			$tags   = array();
+			$group = (isset($in->group))?"group_id >= 0":"group_id = 0";
+
+			if (isset($in->content)){
+				$db = registry('db');
+				$query = "SELECT name, MATCH(name) AGAINST (? IN BOOLEAN MODE) AS score
+						FROM tags_auto
+						WHERE $group AND MATCH(name) AGAINST (? IN BOOLEAN MODE)
+						ORDER BY `score` DESC
+						LIMIT $offset, $limit";
+				$fetch = $db->fetch($query, array($in->content, $in->content));
+				foreach ($fetch as $f) $tags[] = $f->name;
+				if ($tags){
+					Response::json(array('tags' => $tags, 'price' => vnprice($in->content)));
+				} else {
+					Response::json(array('tags' => array()),404);
+				}
+			}
+		}
+		exit;
+	}
 	public function create()
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$u = unserialize(cookie::get('user'));
-				$meta = array();
-				$input = input();
-				$message = new Model_Messages();
-
-				foreach ((array)$input as $key => $value) {
-					if( in_array($key, array('address', 'map', 'price', 'phone')) ){
-						$meta[$key] = $value;
-					}
-					elseif($key == 'message'){
-						$message->message = $value;
-					}
-					elseif($key == 'tag'){
-						$message->tag = $value;
-					}
-					elseif($key == 'type'){
-						$message->type = $value;
-					}
-				}
-
+				$u = @unserialize(cookie::get('user'));
 				if($u['idu']){ // If exist User
-					$message->uid = $u['idu'];
-				} else {
-					$user_exist = Model_User::fetch(array('phone' => numify($meta["phone"])),1);
-					if ($user_exist[0]){
-						$user = $user_exist[0];
-					} else {
-						$user        = new Model_User();
-						$user->phone = numify($meta["phone"]);
-						$user->save();
+					$meta = $tags = array();
+					$in = input();
+					$m = new Model_Messages();
+					$m->date = date('Y-m-d H:i:s');
+					foreach ((array)$in as $k => $v) if($v&&$k) {
+						if( in_array($k, array('address', 'map', 'price', 'rent', 'local')) ){
+							$meta[$k] = trim($v);
+						}
+						elseif($k == 'message'){
+							$m->message = $v;
+						}
+						elseif($k == 'type'){
+							$m->type = $v;
+						}
+						elseif($k == 'tag'){
+							$tags = array_unique($v);
+						}
+						elseif($k == 'images'){
+							$m->value = implode(",", $v);
+						}
 					}
-					$message->uid = $user->idu;
-				}
 
-				$message->save();
 
-				foreach ($meta as $key => $value) {
-					$mt         = new Model_MessagesMeta();
-					$mt->msg_id = $message->id;
-					$mt->type   = $key;
-					$mt->value  = $value;
-					$mt->save();
-				}
+					/*/ Auto Tags
+					$b  = array();
+					$c  = string::slug($m->message);
+					$ar = Model_TagsAuto::fetch();
+					foreach ($ar as $v) $b[] = $v->name;
+					foreach ($b as $v) if (strpos($c, string::slug($v))!==false) $tags[] = $v;
+					*/
+					// Check
+					if (strlen($m->message)>=3){
+						$m->uid = $u['idu'];
 
-				// Tags
-				$del = Model_TagsOccurrence::fetch(array('msg_id' => $message->id));
-				if ($del) foreach ($del as $d) $d->delete();
-				$tags = explode(',',$message->tag.",".$meta['price'].",".$meta['address']);
-				foreach ($tags as $tag) {
-					$tag_id = Model_Tags::get_or_insert($tag);
-					if ($tag_id){
-						$tags_occurrence         = new Model_TagsOccurrence();
-						$tags_occurrence->msg_id = $message->id;
-						$tags_occurrence->tag_id = $tag_id;
-						$tags_occurrence->save();
+						if(isset($tags)) $m->tag = implode(",", $tags);
+
+						$ar = array();
+						foreach (explode(',',$m->tag) as $v) if(strlen($v)>2) $ar[] = string::slug($v);
+						if (count($ar)){
+							$link = $_link = implode("/", array_slice($ar, 0, 5));
+							$i = 0;
+							$check = 1;
+							while ($check = Model_Messages::fetch(array('link' => $link))){
+								$i++;
+								$link = "$_link/$i";
+							}
+							$m->link = $link;
+						}
+						if (true!=Cache::get(md5(serialize((array)$in)))){
+							$m->save();
+							Cache::set(md5(serialize((array)$in)),true);
+						}
+
+						$link = (isset($link))?$link:$id;
+						$url = ($m->type=='status')?"/c/$link.html":"/p/$link.html";
+						pingSE($url);
+
+						$del = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
+						if ($del) foreach ($del as $d) $d->delete();
+						foreach ($meta as $key => $value) if ($value&&$key) {
+							$mt         = new Model_MessagesMeta();
+							$mt->msg_id = $m->id;
+							$mt->type   = $key;
+							$mt->value  = $value;
+							$mt->save();
+						}
+
+						// Tags
+						$arr = array();
+						if (isset($meta["local"])){
+							if($ar = @explode(',',$meta["local"])) while (count($ar)>0) {
+								$arr[string::slug(implode(",", $ar))] = trim($ar[0]);
+								$ar = array_slice($ar, 1);
+							}
+						}
+						if(isset($arr)){
+							if(isset($tags)) foreach ($tags as $t) $arr[string::slug($t)] = $t;
+							$del = Model_TagsOccurrence::fetch(array('msg_id' => $m->id));
+							if ($del) foreach ($del as $d) $d->delete();
+							foreach ($arr as $key => $value) {
+								$tag_id = Model_Tags::get_or_insert($value,$key);
+								if ($tag_id){
+									$count = Model_TagsOccurrence::count(array('msg_id' => $m->id, 'tag_id' => $tag_id));
+									if ($count<1){
+										$tags_occurrence         = new Model_TagsOccurrence();
+										$tags_occurrence->msg_id = $m->id;
+										$tags_occurrence->tag_id = $tag_id;
+										$tags_occurrence->save();
+									}
+								}
+							}
+						}
+						// end Tags
+						Response::json(array('message' => array('id' => (isset($m->link))?$m->link:$m->id)));
+					}else {
+						Response::json(array('flash' => 'Nội dung quá ngắn, ít nhất 3 ký tự'), 403);
+						exit;
 					}
 				}
-				// end Tags
-
-				Response::json(array(
-					'message' => $message->to_array(),
-					'meta'=>$meta)
-				);
+				else {
+					Response::json(array("flash" => "Lỗi: Đăng tin không thành công."), 403);
+					exit;
+				}
 			}
 		}
 		exit;
@@ -99,25 +169,123 @@ class Controller_Api_Message extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$tag = $meta = array();
-				$input = input();
-				$msg = new Model_Messages(str_replace('.html','',$input->id));
-				if ($msg){
-					$mt = Model_MessagesMeta::fetch(array('msg_id' => $msg->id));
-					if ($mt) foreach($mt as $m) $meta[$m->type] = mb_convert_case($m->value, MB_CASE_TITLE, "UTF-8");
+				$tags = $local = $meta = $comments = $image = $video = $audio = $attach = array();
+				$in = input();
+				$id = str_replace('.html','',$in->id);
+				if (int($id)) {
+					$m = new Model_Messages($id);
+				} else {
+					$m = Model_Messages::fetch(array('link' => $id),1);
+					$m = end($m);
+				}
+				// Message
+				if (isset($m)){
+					// User
+					$u  = new Model_User($m->uid);
 
-					foreach (explode(',',$msg->tag) as $v) $tag[string::slug($v)] = trim($v);
+					// Meta Tag
+					$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
+					if ($mt) foreach($mt as $v) $meta[$v->type] = trim($v->value);
+					if (isset($meta["map"])) $meta["map"] = explode(",",$meta["map"]);
+					if (isset($meta["local"])){
+						if($ar = @explode(',',$meta["local"])) while (count($ar)>0) {
+							$local[string::slug(implode(",", $ar))] = trim($ar[0]);
+							$ar = array_slice($ar, 1);
+						}
+						$meta["local"] = $local;
+					}
+					$_tags = array();
+					if($ar = @explode(',',$m->tag)) foreach ($ar as $a) if($x=trim($a)){
+						if ($b = Model_Group::fetch(array('name' => $x))){
+							$meta["local"][string::slug($x)] = $x;
+						} else {
+							$_tags = array_merge($_tags,Model_TagsGroup::get_array($x));
+						}
+					}
+					//die(dump($_tags));
 
-					if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
-						$meta[$b->type] = mb_convert_case($b->value, MB_CASE_TITLE, "UTF-8");
+					if ($ar = array_unique($_tags)) foreach ($ar as $a) $tags[string::slug($a)] = trim($a);
+
+					//
+					$where   = array('msg_id' => $m->id);
+					$share   = Model_Share::count($where);
+					$like    = Model_Likes::count($where);
+					$fetchs  = Model_Comments::fetch($where);
+					$comment = count($fetchs);
+
+					if ($fetchs) foreach ($fetchs as $c) {
+						$by  = new Model_User($c->by);
+						$comments[] = array(
+							'comment'  => nl2br($c->message),
+							'time'     => Time::show($c->time),
+							'name'     => $by->first_name,
+							'location' => '',
+							);
+					}else{
+						$comments[] = array(
+							'comment'  => '',
+							'time'     => '',
+							'name'     => '',
+							'location' => '',
+							);
 					}
 
-					$user = new Model_User($msg->uid);
+					// User cookie
+					$user   = @unserialize(cookie::get('user'));
+					$liked = $shared = $commented = 0;
+					if ($user&&$user['idu']){
+						$where     = array('msg_id' => $m->id, 'by' => $user['idu']);
+						$liked     = Model_Likes::count($where);
+						$commented = Model_Comments::count($where);
+						$shared    = Model_Share::count($where);
+					}
+
+					if ($value = @explode(",", $m->value)){
+						foreach ($value as $v) if ($v=trim($v)) {
+							$p=pathinfo($v);
+							if (@in_array($p['extension'], explode('|','gif|jpg|jpeg|png'))){
+								$image[] = $v;
+							}
+							elseif (@in_array($p['extension'], explode('|','mp3|mp4|mov|ogg'))){
+								$video[] = $v;
+							}
+							elseif (@in_array($p['extension'], explode('|','mp3|m4a'))){
+								$audio[] = $v;
+							}
+							elseif (@in_array($p['extension'], explode('|','txt|doc|docx|xls|ppt|pdf|rtf|zip|rar|tar|gz'))){
+								$attach[] = $v;
+							}
+						}
+					}
 					Response::json(array(
-						'user' => $user->to_array(),
-						'post' => $msg->to_array(),
-						'meta' => $meta,
-						'tags' => $tag)
+						'id'       => $m->id,
+						'link'     => ($m->link)?$m->link:$m->id,
+						'message'  => nl2br($m->message),
+						'time'     => Time::show($m->date),
+						'img'      => (isset($image[0]))?"http://static.nhadat.com/640/media/".$image[0]:'http://static.nhadat.com/640/media/default.png',
+						'image'    => $image,
+						'video'    => $video,
+						'audio'    => $audio,
+						'attach'   => $attach,
+						'meta'     => $meta,
+						'tags'     => $tags,
+						'comments' => $comments,
+						'social'   => array(
+							'share'     => $share,
+							'comment'   => $comment,
+							'like'      => $like,
+							'shared'    => $shared,
+							'commented' => $commented,
+							'liked'     => $liked,
+						),
+						'user'     => array(
+							'id'       => $u->idu,
+							'username' => ($u->username)?$u->username:'',
+							'name'     => $u->first_name,
+							'image'    => ($u->image)?"http://static.nhadat.com/128/avatars/".$u->image:'http://static.nhadat.com/128/avatars/default.png',
+							'phone'    => $u->phone,
+							),
+						)
 					);
 				} else{
 					Response::json(array('flash' => 'not_found'),404);
@@ -131,13 +299,13 @@ class Controller_Api_Message extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$input = input();
-				$msg = new Model_Messages($input->id);
+				$in = input();
+				$msg = new Model_Messages($in->id);
 				if ($msg){
 					$u = unserialize(cookie::get('user'));
 					if($msg->uid==$u['idu']){ // message of User
 						$meta = array();
-						foreach ((array)$input as $key => $value) {
+						foreach ((array)$in as $key => $value) {
 							if( in_array($key, array('address', 'map', 'price', 'phone')) ){
 								$meta[$key] = $value;
 							} else {
@@ -146,7 +314,7 @@ class Controller_Api_Message extends Controller
 						}
 						$msg->save();
 
-						$del = Model_MessagesMeta::fetch(array('msg_id' => $input->id));
+						$del = Model_MessagesMeta::fetch(array('msg_id' => $in->id));
 						if ($del) foreach ($del as $d) $d->delete();
 
 						foreach ($meta as $key => $value) {
@@ -177,16 +345,19 @@ class Controller_Api_Message extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$input = input();
-				$msg = new Model_Messages($input->id);
-				if ($msg){
-					$u = unserialize(cookie::get('user'));
-					if($msg->uid==$u['idu']){ // message of User
-
+				$in = input();
+				$id = $in->id;
+				if (int($id)) {
+					$msg = new Model_Messages($id);
+				} else {
+					$msg = Model_Messages::fetch(array('link' => $id),1);
+					$msg = end($msg);
+				}
+				$u = @unserialize(cookie::get('user'));
+				if (isset($msg->uid)){
+					if($msg->uid==$u['idu']){
+						//User
 						$msg->delete();
-						$meta = Model_MessagesMeta::fetch(array('msg_id' => $input->id));
-						if ($meta) foreach ($meta as $d) $d->delete();
-
 						Response::json(array('flash' => 'success'));
 					} else{
 						Response::json(array('flash' => 'permission_denied'),403);

@@ -1,4 +1,9 @@
-<?php
+if(AJAX_REQUEST){
+			$tpl = new Template('welcome');
+			echo $tpl->make();
+			exit;
+		}
+		else $this->content = new View('welcome');<?php
 /*
  *
  * Copyright 2013 Le Duong <du@leduong.com>
@@ -31,8 +36,12 @@
 
 class Controller_Common_Index extends Controller
 {
-  public function index()
-  {
-    
-  }
+	public function index()
+	{
+		if(AJAX_REQUEST){
+			$tpl = new Template("index");
+			echo $tpl->make();
+			exit;
+		} else $this->content = '';
+	}
 } // END class

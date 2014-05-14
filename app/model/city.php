@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `city` (
  * @package default
  * @author
  **/
-class Model_City extends ORM
+class Model_City extends APCORM
 {
   public static $t = 'cities';
 } // END class

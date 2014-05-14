@@ -40,21 +40,22 @@ CREATE TABLE IF NOT EXISTS `tags` (
  * @package default
  * @author
  **/
-class Model_Tags extends ORM
+class Model_Tags extends APCORM
 {
   public static $t = 'tags'; // Table
   public static $k = 'id'; // Default 'id' , PRIMARY KEY AUTO_INCREMENT
   public static $f = 'tag_id'; // FOREIGN KEY
 
   public static $h = array('occurrence' => 'Model_TagsOccurrence'); // Relations Ship
-  public static function get_or_insert($name){
-    if($slug=self::fetch(array('slug' => string::slug($name)),1)){
-      return $slug[0]->id;
+  public static function get_or_insert($name,$slug = NULL){
+    $slug = (is_null($slug))?string::slug($name):$slug;
+    if($fetch=self::fetch(array('slug' => $slug),1)){
+      return $fetch[0]->id;
     }
     else{
       $t = new Model_Tags();
       $t->name = trim($name);
-      $t->slug = string::slug($name);
+      $t->slug = $slug;
       $t->save();
       return $t->id;
     }

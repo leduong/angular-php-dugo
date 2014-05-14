@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
  * @package default
  * @author
  **/
-class Model_Comments extends ORM
+class Model_Comments extends APCORM
 {
   public static $t = 'comments';
 } // END class

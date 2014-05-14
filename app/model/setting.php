@@ -88,7 +88,7 @@ INSERT INTO `settings` (`title`, `theme`, `perpage`, `censor`, `captcha`, `inter
  * @package default
  * @author
  **/
-class Model_Setting extends ORM
+class Model_Setting extends APCORM
 {
   public static $t = 'setting';
 } // END class

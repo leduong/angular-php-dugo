@@ -28,7 +28,7 @@ class Controller_Admin_Comments extends Controller
 		$offset = $limit*($page-1);
 		$sort   = array('id' => 'DESC');
 		$total  = Model_Comments::count();
-		
+
 		$this->content = new View('comments');
 		$this->content->message = $this->content->form = NULL;
 		$this->content->page = $page;
@@ -42,13 +42,13 @@ class Controller_Admin_Comments extends Controller
 		);
 		$pagination->attributes = array(
 			'class' => 'dataTables_paginate paging_bootstrap pagination');
-		
+
 		$this->content->comments = Model_Comments::fetch(
 			NULL,
 			$limit,
 			$offset,
 			array('id' => 'DESC'));
-			
+
 		$this->content->pagination = $pagination;
 	}
 	public function create()
@@ -58,40 +58,26 @@ class Controller_Admin_Comments extends Controller
 		$this->content->message = NULL;
 
 		$rules = array(
-			'uid' => 'required|numeric',
-			'mid' => 'required|numeric',
+			'user_id'   => 'required|numeric',
+			'msg_id'   => 'required|numeric',
 			'message' => 'required|string'
 		);
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
 			$c = new Model_Comments();
-			$c->uid = post('uid');
-			$c->mid = post('mid');
+			$c->msg_id = post('msg_id');
+			$c->user_id = post('user_id');
 			$c->message = post('message');
 			$c->save();
 			$this->content->message = lang('success');
 			unset($_POST);
 		}
-		
-		$users = array('' => 'Choose');
-		
-		if ($us = Model_User::fetch())
-			foreach($us as $u){
-				$users[$u->idu] = $u->username;
-			}
-			
-		$messages = array(''=>'Choose');
-		
-		if($ms = Model_Messages::fetch())
-			foreach($ms as $m){
-				$messages[$m->id] = $m->message;
-			}
 
 		$fields = array(
-			'uid' => array('type' => 'select', 'options' => $users, 'div' => array('class' => 'control-group')),
-			'mid' => array('type' => 'select', 'options' => $messages, 'div' => array('class' => 'control-group')),
-			'message' => array('div' => array('class' => 'control-group')),
+			'user_id' => array('div' => array('class' => 'control-group')),
+			'msg_id' => array('div' => array('class' => 'control-group')),
+			'message' => array('type' => "textarea", 'div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 
@@ -105,46 +91,32 @@ class Controller_Admin_Comments extends Controller
 		$this->content = new View('comments');
 		$this->content->message = NULL;
 		$rules = array(
-			'uid'   => 'required|numeric',
-			'mid'   => 'required|numeric',
+			'user_id'   => 'required|numeric',
+			'msg_id'   => 'required|numeric',
 			'message' => 'required|string'
 		);
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
 			$c = new Model_Comments(post('key'));
-			$c->uid = post('uid');
-			$c->mid = post('mid');
+			$c->user_id = post('user_id');
+			$c->msg_id = post('msg_id');
 			$c->message = post('message');
 			$c->save();
 			unset($_POST);
 			$this->content->message = lang('success');
 		}
-		
-		$users = array('' => 'Choose');
-		
-		if ($us = Model_User::fetch())
-			foreach($us as $u){
-				$users[$u->idu] = $u->username;
-			}
-			
-		$messages = array(''=>'Choose');
-		
-		if($ms = Model_Messages::fetch())
-			foreach($ms as $m){
-				$messages[$m->id] = $m->message;
-			}
 
 		$c = new Model_Comments(get('edit'));
-			
+
 		$fields = array(
 			'key' => array('type' => 'hidden', 'value' => $c->id),
-			'uid' => array('type' => 'select', 'value' => $c->uid, 'options' => $users, 'div' => array('class' => 'control-group')),
-			'mid' => array('type' => 'select', 'value' => $c->mid, 'options' => $messages, 'div' => array('class' => 'control-group')),
-			'message' => array('value' => $c->message, 'div' => array('class' => 'control-group')),
+			'user_id' => array('value' => $c->by, 'div' => array('class' => 'control-group')),
+			'msg_id' => array('value' => $c->msg_id, 'div' => array('class' => 'control-group')),
+			'message' => array('value' => $c->message, 'type' => "textarea", 'div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
-		
+
 		$form = new Form($validation, array('id' => 'form', 'class' => 'form-horizontal'));
 		$form->fields($fields);
 		$this->content->form = $form;

@@ -27,7 +27,7 @@
  * @package default
  * @author
  **/
-class Model_MessagesMeta extends ORM
+class Model_MessagesMeta extends APCORM
 {
   public static $t = 'messages_meta';
 } // END class

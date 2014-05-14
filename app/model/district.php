@@ -29,7 +29,7 @@
  * @package default
  * @author
  **/
-class Model_District extends ORM
+class Model_District extends APCORM
 {
   public static $t = 'districts'; // Table
   public static $f = 'city_id'; // FOREIGN KEY

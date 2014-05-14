@@ -23,31 +23,36 @@
 		}
 	};
 
+	var x_same_y = function() {
+		var y,x = $('body').width();
+		if (x > 360) {
+			y = x / 3;
+		} else {
+			y = x / 2;
+		}
+		$('.square').css({
+			'height': y + 'px'
+		});
+	};
+
 	/**
 	 * Ready, Load, Resize and Scroll Functions
 	 */
 	var onReady = {
 		init: function() {
+			x_same_y();
 			scrollTop.init();
 		}
 	};
 	$(document).ready(onReady.init);
 })(jQuery);
 
-function tienVND(s) {
-	var lv = new Array(' ', '.000', ' TR', ' TỈ', '.000 TỈ');
-	s = parseInt(s);
-	if (s < 100000) {
-		if (s>1000){
-			s /= 1000;
+function AntiCaps(s) {
+	var c = 0;
+	for (i = 0; i < s.length; i++) {
+		if (s[i].charCodeAt(s[i]) >= 65 && s[i].charCodeAt(s[i]) <= 90) {
+			c++;
 		}
-
-	} else {
-		for (var i = 0; s >= 1000; i++) s /= 1000;
-		if (s) return s + lv[i];
 	}
-
-	for (var i = 0; s >= 1000; i++) s /= 1000;
-	if (s) return s + lv[i];
-	return '';
+	return ((c / s.length * 100) < 15);
 }

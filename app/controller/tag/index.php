@@ -31,12 +31,43 @@
 
 class Controller_Tag_Index extends Controller
 {
-  public function index()
-  {
-  	if(AJAX_REQUEST){
-  		$tpl = new Template("tag/index");
-		echo $tpl->make();
-		exit;
-  	} else $this->content = '';
-  }
+	public function index()
+	{
+		if(AJAX_REQUEST){
+			$tpl = new Template("tag");
+			echo $tpl->make();
+			exit;
+		} else {
+			$slug = substr(url(),2,(strlen(url())-7));
+			$keywords = $ar = array();
+			$all = Model_TagsGroup::get_array($slug);
+			if($fetch = Model_Group::fetch(array('slug' => $slug),1)){
+				$a   = end($fetch);
+				$str = $a->name.",".$a->long_name.",".$a->tag.",".$a->address.",".$a->local;
+				$ar  = @explode(",", $str);
+			}
+			else if($fetch = Model_City::fetch(array('slug' => $slug),1)){
+				$a  = end($fetch);
+				$ar = @explode(",", $a->name);
+			}
+			else if($fetch = Model_District::fetch(array('slug' => $slug),1)){
+				$a    = end($fetch);
+				$city = new Model_City($a->city_id);
+				$ar   = @explode(",", $a->name.", ".$city->name);
+			}
+			else if($fetch = Model_Zipcode::fetch(array('slug' => $slug),1)){
+				$a  = end($fetch);
+				$ar = @explode(",", $a->full_name);
+			} else if ($fetch = Model_Tags::fetch(array('slug' => $slug),1)) {
+				$a  = end($fetch);
+				$ar = @explode(",", $a->name);
+			}
+			$arr = array_merge($ar,$all, explode(",", $this->appsite['meta_keywords']));
+			foreach ($arr as $a) if ($b=trim($a)) $keywords[] = $b;
+			$this->appsite['site_title']       = "Mua bán nhà đất, Bất động sản ".implode(", ", array_unique($keywords));
+			$this->appsite['meta_keywords']    = "Mua bán nhà đất, Bất động sản, ".implode(", ", array_unique($keywords));
+			$this->appsite['meta_description'] = "Mua bán nhà đất, Bất động sản, ".implode(", ", array_unique($keywords));
+			$this->content = $slug;
+		}
+	}
 } // END class

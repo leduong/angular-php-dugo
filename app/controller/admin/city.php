@@ -50,7 +50,7 @@ class Controller_Admin_City extends Controller
 			'sort'   => 'required|numeric'
 		);
 		$validation = new Validation();
-		
+
 		if($validation->run($rules))
 		{
 			$c = new Model_City();
@@ -64,7 +64,7 @@ class Controller_Admin_City extends Controller
 			$this->content->message = lang('success');
 			unset($_POST);
 		}
-		
+
 		$fields = array(
 			'name'        => array('div' => array('class' => 'control-group')),
 			'description' => array('type' => 'textarea', 'div' => array('class' => 'control-group')),

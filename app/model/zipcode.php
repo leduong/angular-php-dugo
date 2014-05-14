@@ -35,7 +35,7 @@ CREATE TABLE `table` (
  * @package default
  * @author
  **/
-class Model_Zipcode extends ORM
+class Model_Zipcode extends APCORM
 {
   public static $t = 'zipcode'; // Table
   //public static $k = 'id'; // Default 'id' , PRIMARY KEY AUTO_INCREMENT

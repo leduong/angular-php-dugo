@@ -86,7 +86,7 @@ class Controller_Search_Index extends Controller
 				}
 				else Response::json(array('flash' => "Không tìm thấy $query"), 404);
 			}else{
-				$tpl = new Template("search/index");
+				$tpl = new Template("search");
 				echo $tpl->make();
 			}
 			exit;
@@ -180,7 +180,7 @@ class Controller_Search_Index extends Controller
 				$keyword = string::slug($input->keyword);
 
 				$fetch = Model_Group::fetch(array("slug LIKE '%$keyword%'"),8);
-				if ($fetch)foreach ($fetch as $f) $array[]=$f->name;
+				if ($fetch) foreach ($fetch as $f) $array[]=$f->name.", ".$f->address;
 				// Zipcode
 				$fetch = Model_Zipcode::fetch(array("slug LIKE '%$keyword%'"),8);
 				if ($fetch){

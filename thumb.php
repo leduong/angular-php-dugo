@@ -31,8 +31,8 @@ if(!empty($_GET['t'])) {
 		$quality_list = array(50, 75, 100);
 	} elseif($_GET['t'] == 'm') {
 		$type = 'uploads/media';
-		$width_list = array(100, 200, 204, 300, 320, 435, 500, 650, 700, 800, 900, 1000);
-		$height_list = array(100, 200, 204, 300, 320, 435, 500, 650, 700, 800, 900, 1000);
+		$width_list = array(50, 100, 200, 204, 300, 320, 435, 500, 630, 650, 700, 800, 900, 1000);
+		$height_list = array(50, 100, 200, 204, 300, 320, 435, 500,  630, 650, 700, 800, 900, 1000);
 		$quality_list = array(50, 75, 100);
 	} elseif($_GET['t'] == 'c') {
 		$type = 'uploads/covers';

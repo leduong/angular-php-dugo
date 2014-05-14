@@ -24,9 +24,9 @@ class Controller_Admin_Messages extends Controller
 	public function lists()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
-		$limit  =25;
-		$page   =((int)get('page')>1)?(int)get('page'):1;
-		$offset =$limit*($page-1);
+		$limit  = $this->appsite['limit_per_page'];
+		$page   = ((int)get('page')>1)?(int)get('page'):1;
+		$offset = $limit*($page-1);
 		$total  = Model_Messages::count();
 		$sort	= array('id' => 'DESC');
 
@@ -73,9 +73,10 @@ class Controller_Admin_Messages extends Controller
 			$c->save();
 
 			$meta = array();
+			if(post('local')   != '') $meta['local'] = post('local');
 			if(post('address') != '') $meta['address'] = post('address');
-			if(post('phone')   != '') $meta['phone'] = post('phone');
 			if(post('map')     != '') $meta['map'] = post('map');
+			if(post('rent')   != '') $meta['rent'] = post('rent');
 			if(post('price')   != '') $meta['price'] = post('price');
 			foreach($meta as $k => $v){
 				$mt = new Model_MessagesMeta();
@@ -85,37 +86,22 @@ class Controller_Admin_Messages extends Controller
 				$mt->save();
 			}
 
-			// Tags
-			$del = Model_TagsOccurrence::fetch(array('msg_id' => $c->id));
-			if ($del) foreach ($del as $d) $d->delete();
-			$tags = explode(',',$c->tag.",".$meta['price'].",".$meta['address']);
-			if ($tags) foreach ($tags as $tag) {
-				$tag_id = Model_Tags::get_or_insert($tag);
-				if ($tag_id){
-					$tags_occurrence         = new Model_TagsOccurrence();
-					$tags_occurrence->msg_id = $c->id;
-					$tags_occurrence->tag_id = $tag_id;
-					$tags_occurrence->save();
-				}
-			}
-			// end Tags
+			Model_Messages::rebuild($c->id);
 			$this->content->message = lang('success');
 			unset($_POST);
 		}
 
-		$users = array(''=>'Choose');
-		$types = array('status'=>'Status','picture'=>'Picture','video'=>'Video','realestate'=>'Real Estate');
-		if($ar = Model_User::fetch()) foreach($ar as $a) $users[$a->idu] = $a->username;
+		$types = array('status'=>'Status', 'realestate'=>'Real Estate');
 
 		$fields = array(
-			'uid'     => array('type'=>'select', 'options'=>$users, 'div' => array('class' => 'control-group')),
+			'uid'     => array('div' => array('class' => 'control-group')),
 			'type'    => array('type'=>'select', 'options'=>$types, 'div' => array('class' => 'control-group')),
 			'message' => array('type' => 'textarea', 'div' => array('class' => 'control-group')),
 			'tag'     => array('div' => array('class' => 'control-group')),
 			'address' => array('div' => array('class' => 'control-group')),
-			'phone'   => array('div' => array('class' => 'control-group')),
-			'map'     => array('div' => array('class' => 'control-group')),
+			'rent'    => array('div' => array('class' => 'control-group')),
 			'price'   => array('div' => array('class' => 'control-group')),
+			'map'     => array('div' => array('class' => 'control-group')),
 			'submit'  => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 
@@ -131,74 +117,65 @@ class Controller_Admin_Messages extends Controller
 		$rules = array(
 			'message'   => 'required|string',
 		);
+
+		$c = new Model_Messages(get('edit'));
+		$msg_id = $c->id;
+
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
-
-			$c = new Model_Messages(post('key'));
-			$msg_id = $c->id;
 			$c->message = post('message');
-			$c->tag = post('tag');
-			$c->type = post('type');
+			$c->tag     = post('tag');
+			$c->type    = post('type');
+			$c->value   = post('picture');
 			$c->save();
-			// Tags
-			$del = Model_TagsOccurrence::fetch(array('msg_id' => $msg_id));
-			if ($del) foreach ($del as $d) $d->delete();
-			$tags = explode(',',$c->tag);
-			foreach ($tags as $tag) {
-				$tag_id = Model_Tags::get_or_insert($tag);
-				if ($tag_id){
-					$tags_occurrence = new Model_TagsOccurrence();
-					$tags_occurrence->msg_id = $msg_id;
-					$tags_occurrence->tag_id = $tag_id;
-					$tags_occurrence->save();
-				}
-			}
-			// end Tags
+			// Ping SEO
+			$url = ($c->type=='status')?"/c/".$c->link.".html":"/p/".$c->link.".html";
+			pingSE($url);
 
 			$del = Model_MessagesMeta::fetch(array('msg_id' => $msg_id));
 			if ($del) foreach ($del as $d) $d->delete();
 			$meta = array();
+
+			if(post('local')   != '') $meta['local'] = post('local');
 			if(post('address') != '') $meta['address'] = post('address');
-			if(post('phone')   != '') $meta['phone'] = post('phone');
 			if(post('map')     != '') $meta['map'] = post('map');
+			if(post('rent')    != '') $meta['rent'] = post('rent');
 			if(post('price')   != '') $meta['price'] = post('price');
-			foreach($meta as $k=>$m){
+			foreach($meta as $k => $v){
 				$mt = new Model_MessagesMeta();
 				$mt->msg_id = $msg_id;
 				$mt->type = $k;
-				$mt->value = $m;
+				$mt->value = trim($v);
 				$mt->save();
-
 			}
-
+			Model_Messages::rebuild($c->id);
+			// end Tags
 			unset($_POST);
 			$this->content->message = lang('success');
 		}
 
-		$c = new Model_Messages(get('edit'));
-
 		$uid = new Model_User($c->uid);
-		$metas = Model_MessagesMeta::fetch(array('msg_id'=>$c->id));
-		$ms = array('address'=>'','phone'=>'','map'=>'','price'=>'');
-		$types = array('status'=>'Status','picture'=>'Picture','video'=>'Video','realestate'=>'Real Estate');
-
-		foreach($metas as $m){
+		$ms = array('address'=>'','rent'=>'','map'=>'','price'=>'','local'=>'');
+		$types = array('status'=>'Status', 'realestate'=>'Real Estate');
+		$meta = Model_MessagesMeta::fetch(array('msg_id'=>$c->id));
+		if ($meta) foreach($meta as $m){
 			$ms[$m->type] = $m->value;
 		}
-		$user = sprintf("%s %s (%s)",$uid->first_name, $uid->last_name, $uid->username);
+		$user = sprintf("%s %s (id: %s)",$uid->first_name, $uid->last_name, $uid->idu);
 
 		$fields = array(
 			'key'        => array('type' => 'hidden', 'value' => $c->id),
 			'uid'        => array('value' => $user, 'attributes' => array('disabled' => 'disabled')),
 			'type'       => array('value' => $c->type, 'type'=>'select', 'options'=>$types,),
-			'message'    => array('type' => 'textarea', 'value' => $c->message, 'div' => array('class' => 'control-group'),
-			'attributes' => array('rows' => 10, 'name' => 'message', 'width' => '100%')),
+			'message'    => array('type' => 'textarea', 'value' => $c->message, 'div' => array('class' => 'control-group'), 'attributes' => array('rows' => 10, 'name' => 'message', 'width' => '100%')),
 			'tag'        => array('value' => $c->tag, 'div' => array('class' => 'control-group')),
+			'picture'    => array('value' => $c->value, 'div' => array('class' => 'control-group')),
 			'address'    => array('value' => $ms['address'], 'div' => array('class' => 'control-group')),
-			'phone'      => array('value' => $ms['phone'], 'div' => array('class' => 'control-group')),
-			'map'        => array('value' => $ms['map'], 'div' => array('class' => 'control-group')),
+			'local'      => array('value' => $ms['local'], 'div' => array('class' => 'control-group')),
+			'rent'       => array('value' => $ms['rent'], 'div' => array('class' => 'control-group')),
 			'price'      => array('value' => $ms['price'], 'div' => array('class' => 'control-group')),
+			'map'        => array('value' => $ms['map'], 'div' => array('class' => 'control-group')),
 			'submit'     => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 		$form = new Form($validation, array('id' => 'form', 'class' => 'form-horizontal'));

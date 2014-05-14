@@ -34,9 +34,29 @@ class Controller_Post_Index extends Controller
 	public function index()
 	{
 		if(AJAX_REQUEST){
-			$tpl = new Template("post/index");
+			$tpl = new Template("post");
 			echo $tpl->make();
 			exit;
-		} else $this->content = '';
+		} else {
+			$id = substr(url(),2,(strlen(url())-7));
+			if (int($id)) {
+				$m = new Model_Messages($id);
+			} else {
+				$m = Model_Messages::fetch(array('link' => $id),1);
+				$m = end($m);
+			}
+			if($m){
+				$meta = $keywords = array();
+				$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
+				if ($mt) foreach($mt as $v) $meta[$v->type] = trim($v->value);
+				$ar = @explode(",", $m->tag.",".$meta['address'].",".$meta['local'].",".$this->appsite['meta_keywords']);
+				foreach ($ar as $a) if ($b=trim($a)) $keywords[] = $b;
+
+				$this->appsite['site_title']       = "Mua bán nhà đất, Bất động sản ".implode(", ", array_slice(array_unique($keywords),0,5));
+				$this->appsite['meta_keywords']    = implode(", ", array_unique($keywords));
+				$this->appsite['meta_description'] = substr(substr($m->message,0,256),0,strrpos(substr($m->message,0,256)," "));
+			}
+			$this->content = '';
+		}
 	}
 } // END class

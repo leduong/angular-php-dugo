@@ -36,12 +36,22 @@ class Controller_Api_City extends Controller
 		if(AJAX_REQUEST){
 			if(POST){
 				$input = input();
-				if(isset($input->slug)) if($fetch = Model_City::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
-					$city = $fetch[0]->to_array();
-					$city['map'] = explode(",",$city["map"]);
-					Response::json(array('city' => $city));
-				} else{
-					Response::json(array('city' => array()),404);
+				if(isset($input->slug)) {
+					$slug = str_replace('.html','',$input->slug);
+					if($fetch = Model_City::fetch(array('slug' => $slug),1)){
+						$city = $fetch[0]->to_array();
+						$city['map'] = explode(",",$city["map"]);
+
+						if ($tag = Model_Tags::fetch(array('slug' => $slug),1)) $tag_id = $tag[0]->id;
+
+						if ($u = @unserialize(cookie::get('user'))){
+							$follow = Model_Follows::fetch(array('by' => $u['idu'], 'tag_id' => $tag_id));
+							if ($follow) $city['followed'] = 1;
+						} else $city['followed'] = 0;
+						Response::json(array('city' => $city));
+					} else{
+						Response::json(array('city' => array()),404);
+					}
 				}
 			}
 		}

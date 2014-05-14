@@ -34,12 +34,12 @@ class Controller_Group_Index extends Controller
 	public function index()
 	{
 		if(AJAX_REQUEST){
-			$tpl = new Template("group/index");
+			$tpl = new Template("group");
 			echo $tpl->make();
 			exit;
 		}
 		else $this->content = '';
 	}
 
-	
+
 } // END class

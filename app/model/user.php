@@ -29,40 +29,34 @@
 --
 CREATE TABLE IF NOT EXISTS `users` (
   `idu` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(32) NOT NULL DEFAULT 'Khách vãng lai',
+  `last_name` varchar(32) NOT NULL,
   `username` varchar(32) NOT NULL,
-  `password` varchar(256) NOT NULL,
+  `password` varchar(32) DEFAULT NULL,
+  `opt` char(4) NOT NULL,
   `email` varchar(256) NOT NULL,
-  `phone` varchar(16) NOT NULL,
-  `first_name` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `last_name` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `location` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `website` varchar(128) NOT NULL,
-  `bio` varchar(160) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `date` date NOT NULL,
   `facebook` varchar(256) NOT NULL,
   `twitter` varchar(128) NOT NULL,
   `gplus` varchar(256) NOT NULL,
-  `image` varchar(128) NOT NULL,
-  `private` int(11) NOT NULL,
-  `salted` varchar(256) NOT NULL,
-  `background` varchar(256) NOT NULL,
-  `cover` varchar(128) NOT NULL,
-  `verified` int(11) NOT NULL,
-  `privacy` int(11) NOT NULL DEFAULT '1',
-  `gender` tinyint(4) NOT NULL,
-  `online` int(11) NOT NULL,
-  `offline` tinyint(4) NOT NULL,
-  `notificationl` tinyint(4) NOT NULL,
-  `notificationc` tinyint(4) NOT NULL,
-  `notificationm` tinyint(4) NOT NULL,
-  `notificationd` tinyint(4) NOT NULL,
+  `website` varchar(128) NOT NULL,
+  `bio` varchar(160) NOT NULL,
+  `phone` varchar(16) NOT NULL,
+  `location` varchar(128) NOT NULL,
+  `verified` enum('0','1') NOT NULL,
+  `privacy` enum('0','1') NOT NULL,
+  `gender` enum('-','male','female') NOT NULL,
+  `agent` enum('0','1') NOT NULL,
+  `online` enum('0','1') NOT NULL,
   `email_comment` tinyint(4) NOT NULL,
   `email_like` int(11) NOT NULL,
+  `cover` varchar(128) NOT NULL DEFAULT 'default.png',
+  `image` varchar(128) NOT NULL DEFAULT 'default.png',
   `born` date NOT NULL,
+  `date_join` date NOT NULL,
+  `date_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idu`),
-  UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0 ;
+  UNIQUE KEY `phone` (`phone`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=26 ;
 
 ***/
 
@@ -73,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `users` (
  * @package default
  * @author
  **/
-class Model_User extends ORM
+class Model_User extends APCORM
 {
   public static $t = 'users';
   public static $k = 'idu'; // KEY

@@ -34,36 +34,105 @@ class Controller_Api_Group extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$input = input();
-				if(isset($input->slug)) if($fetch = Model_Group::fetch(array('slug' => str_replace('.html','',$input->slug)),1)){
-					$group = $fetch[0]->to_array();
-					$group['map'] = explode(",",$group["map"]);
-					Response::json(array('group' => $group));
-				} else{
-					Response::json(array('group' => array()),404);
+				$in = input();
+				if(isset($in->slug)) {
+					$slug = str_replace('.html','',$in->slug);
+					if($fetch = Model_Group::fetch(array('slug' => $slug),1)){
+						$group = $fetch[0]->to_array();
+						$group['map'] = explode(",",$group["map"]);
+
+						if ($tag = Model_Tags::fetch(array('slug' => $slug),1)) $tag_id = $tag[0]->id;
+
+						if ($u = @unserialize(cookie::get('user'))){
+							$follow = Model_Follows::fetch(array('by' => $u['idu'], 'tag_id' => $tag_id));
+							if ($follow) $group['followed'] = 1;
+						} else $group['followed'] = 0;
+						Response::json(array('group' => $group));
+					} else{
+						Response::json(array('group' => array()),404);
+					}
 				}
 			}
 		}
 		exit();
 	}
+
 	public function create(){
 		if(AJAX_REQUEST){
 			if(POST){
-				$input          = input();
-				$g              = new Model_Group();
-				$g->name        = $input->name;
-				$g->address     = $input->address;
-				$g->description = $input->description;
-				$g->map         = isset($input->map)?$input->map:'';
-				$g->slug        = string::sanitize_url($g->name);
-				$g->enable      = 0;
-				if($g->save()){
-					$group = $g->to_array();
-					$group['map'] = explode(",",$group["map"]);
-					Response::json(array('group' => $group));
+				$in = input();
+				$u = @unserialize(cookie::get('user'));
+				if($u['idu']) if(isset($in->name)){
+					$tags = explode(",", implode(",", array($in->name,$in->long_name)));
+					if ($tags) foreach ($tags as $v) if ($slug = string::slug($v)) {
+						if ($found = Model_TagsAuto::count(array('slug' => $slug),1)){
+							Response::json(array('flash' => "Tên \"$v\" đã được sử dụng"),403);
+							exit;
+						}
+						if (mb_strlen($v)>32){
+							Response::json(array('flash' => "Tên \"$v\" tối đa 32 ký tự"),403);
+							exit;
+						}
+					}
+
+					$g              = new Model_Group();
+					$g->by          = int($u['idu']);
+					$g->name        = $in->name;
+					$g->slug        = string::slug($g->name);
+					$g->map         = isset($in->map)?$in->map:NULL;
+					$g->tag         = isset($in->tag)?implode(",", $in->tag):NULL;
+					$g->local       = isset($in->local)?$in->local:NULL;
+					$g->address     = isset($in->address)?$in->address:NULL;
+					$g->long_name   = isset($in->long_name)?$in->long_name:NULL;
+					$g->short_name  = isset($in->short_name)?$in->short_name:NULL;
+					$g->subdomain   = isset($in->subdomain)?$in->subdomain:NULL;
+					$g->description = isset($in->description)?$in->description:NULL;
+					if($g->save()){
+						// Model_TagsAuto
+						Model_TagsAuto::get_or_insert($g->name,$g->id);
+						foreach ($tags as $v) Model_Tags::get_or_insert($v,$g->id);
+						// Model_TagsGroup
+						$tag_id = 0;
+						$tag_id = Model_TagsGroup::get_or_insert($g->name,$tag_id,$g->id);
+						$tags = explode(",", $g->long_name);
+						if($tags)foreach ($tags as $v) if ($tag=trim($v)) Model_TagsGroup::get_or_insert($tag,$tag_id,$g->id);
+						// Out
+						$group = $g->to_array();
+						$group['map'] = explode(",",$group["map"]);
+						Response::json(array('group' => $group));
+						exit;
+					}
 				}
-				else
-					Response::json(array('group' => array()),404);
+			}
+		}
+		Response::json(array('group' => array()),404);
+		exit;
+	}
+
+	public function tags(){
+		if(AJAX_REQUEST){
+			$in = input();
+			if(isset($in->keyword)){
+				$array    = $where = array();
+				$slug     = preg_replace("/[^0-9a-z.-]/", "", string::slug($in->keyword));
+				$keywords = explode("-", $slug);
+				foreach ($keywords as $v) $where[] = "slug LIKE '%".string::slug($v)."%'";
+				$where = implode(" OR ", $where);
+				$fetch = Model_Group::fetch(array($where),10);
+				if ($fetch) foreach ($fetch as $f) $array[] = $f->to_array();
+				Response::json(array('results' => $array, 'slug' => $slug));
+			}
+		}
+		exit;
+	}
+	public function domain(){
+		if(AJAX_REQUEST){
+			$in = input();
+			if(isset($in->domain)){
+				$array = array();
+				$fetch = Model_Group::fetch(array('subdomain' => $in->domain),10);
+				if ($fetch) foreach ($fetch as $f) $array[] = $f->to_array();
+				Response::json(array('results' => $array));
 			}
 		}
 		exit;

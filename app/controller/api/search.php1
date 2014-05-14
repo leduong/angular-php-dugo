@@ -1,0 +1,242 @@
+<?php
+/*
+*
+* Copyright 2013 Le Duong <du@leduong.com>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+* MA 02110-1301, USA.
+*
+*
+*/
+/**
+* Controller_Api_Silder class
+*
+* @package Controller_Welcome_Index
+* @author [author] <[email]>
+* @filename {{app}}/controller/api/search.php
+* @template {{app}}/view/api/search.php
+**/
+class Controller_Api_Search extends Controller
+{
+	public function index(){
+		$user       = @unserialize(cookie::get('user'));
+		$in         = input();
+		$limit      = 10;
+		$page       = (isset($in->page)&&((int)$in->page>1))?(int)$in->page:1;
+		$offset     = $limit*($page-1);
+		$where      = (isset($in->search))?(array) $in->search:array();
+		$array      = array();
+		$status     = Model_Messages::count($where + array('type' => 'status'));
+		$realestate = Model_Messages::count($where + array('type' => 'realestate'));
+		if ($fetch=Model_Messages::fetch($where,$limit,$offset,array('id' => 'DESC'))){
+			foreach ($fetch as $m) {
+				$commented = $liked = $shared = NULL;
+				$image = $video = $audio = $attach = $tags = $meta = array();
+				// Get User
+				$u = new Model_User($m->uid);
+				if(isset($u->idu)){
+					foreach (array_slice(explode(',',$m->tag),0,3) as $v) $tags[string::slug($v)] = trim($v);
+					if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
+						$meta[$b->type] = $b->value;
+					}
+
+					$share   = Model_Share::count(array('msg_id' => $m->id));
+					$like    = Model_Likes::count(array('msg_id' => $m->id));
+					$comment = Model_Comments::count(array('msg_id' => $m->id));
+					if (isset($user['idu'])){
+						$where     = array('msg_id' => $m->id, 'by' => $user['idu']);
+						$liked     = Model_Likes::count($where);
+						$commented = Model_Comments::count($where);
+						$shared    = Model_Share::count($where);
+					}
+
+					if ($value = explode(",", $m->value)) foreach ($value as $v) {
+						$p=pathinfo($v);
+						if (@in_array($p['extension'], explode('|','gif|jpg|jpeg|png'))){
+							$image[] = $v;
+						}
+						elseif (@in_array($p['extension'], explode('|','mp3|mp4|mov|ogg'))){
+							$video[] = $v;
+						}
+						elseif (@in_array($p['extension'], explode('|','mp3|m4a'))){
+							$audio[] = $v;
+						}
+						elseif (@in_array($p['extension'], explode('|','txt|doc|docx|xls|ppt|pdf|rtf|zip|rar|tar|gz'))){
+							$attach[] = $v;
+						}
+					}
+
+					$array[]= array(
+						'id'     => ($m->link)?$m->link:$m->id,
+						'type'   => $m->type,
+						'time'   => Time::show($m->time),
+						'img'    => (isset($image[0]))?"/thumb.php?w=630&h=630&t=m&src=".$image[0]:'/thumb.php?w=630&h=630&t=m&src=default.png',
+						'tag'    => $tags,
+						'meta'   => $meta,
+						'image'  => $image,
+						'video'  => $video,
+						'audio'  => $audio,
+						'attach' => $attach,
+						'text'   => nl2br($m->message),
+						'social' => array(
+							'share'     => $share,
+							'comment'   => $comment,
+							'like'      => $like,
+							'shared'    => $shared,
+							'commented' => $commented,
+							'liked'     => $liked,
+							),
+						'user'   => array(
+							'id'       => $u->idu,
+							'username' => (isset($u->username))?$u->username:'',
+							'name'     => $u->first_name,
+							'image'    => ($u->image)?"/thumb.php?w=50&h=50&t=a&src=".$u->image:'/thumb.php?w=50&h=50&t=m&src=default.png',
+							'phone'    => $u->phone,
+							),
+					);
+				}
+			}
+		}
+		Response::json($array);
+		exit;
+	}
+
+	public function findtag()
+	{
+		if(AJAX_REQUEST){
+			if(POST){
+				$user   = @unserialize(cookie::get('user'));
+				$in     = input();
+				$array  = array();
+				$limit  = 10;
+				$page   = (isset($in->page)&&((int)$in->page>1))?(int)$in->page:1;
+				$offset = $limit*($page-1);
+				//$keywords = (isset($in->keyword))?explode(",", $in->keyword):array();
+				//$where    = array();
+				//foreach ($keywords as $k) if ($k) $where[] = "slug = '".string::slug($k)."'";
+				$where = "slug LIKE '%".string::slug($in->keyword)."%'";//implode(" OR ", $where);
+				if ($fetch=Model_Tags::fetch(array($where),$limit,$offset)){
+					foreach ($fetch as $f) {
+						$f->load();
+						$occurrence = $f->occurrence();
+						$exist = array();
+						if ($occurrence) foreach ($occurrence as $o) {
+							$m = new Model_Messages($o->msg_id);
+							if (isset($m->id)&&!in_array($m->id, $exist)) {
+								$exist[] = $m->id;
+								$commented = $liked = $shared = NULL;
+								$image = $video = $audio = $attach = $tags = $meta = array();
+								// Get User
+								if (isset($m->uid)) $u = new Model_User($m->uid);
+								if(isset($u->idu)&&isset($m->id)){
+									if($ar = explode(',',$m->tag)) foreach (array_slice($ar,0,3) as $v) $tags[string::slug($v)] = trim($v);
+									if ($mt = Model_MessagesMeta::fetch(array('msg_id'=>$m->id))) foreach($mt as $b){
+										$meta[$b->type] = $b->value;
+									}
+
+									$share   = Model_Share::count(array('msg_id' => $m->id));
+									$like    = Model_Likes::count(array('msg_id' => $m->id));
+									$comment = Model_Comments::count(array('msg_id' => $m->id));
+									if ($user&&$user['idu']){
+										$where     = array('msg_id' => $m->id, 'by' => $user['idu']);
+										$liked     = Model_Likes::count($where);
+										$commented = Model_Comments::count($where);
+										$shared    = Model_Share::count($where);
+									}
+
+									if ($value = explode(",", $m->value)) foreach ($value as $v) {
+										$p=pathinfo($v);
+										if (@in_array($p['extension'], explode('|','gif|jpg|jpeg|png'))){
+											$image[] = trim($v);
+										}
+										elseif (@in_array($p['extension'], explode('|','mp3|mp4|mov|ogg'))){
+											$video[] = trim($v);
+										}
+										elseif (@in_array($p['extension'], explode('|','mp3,m4a'))){
+											$audio[] = trim($v);
+										}
+										else{
+											$attach[] = trim($v);
+										}
+									}
+
+									$array[]= array(
+										'id'     => ($m->link)?$m->link:$m->id,
+										'type'   => $m->type,
+										'time'   => Time::show($m->time),
+										'img'    => (isset($image[0]))?"/thumb.php?w=630&h=630&t=m&src=".$image[0]:'/thumb.php?w=630&h=630&t=m&src=default.png',
+										'tag'    => $tags,
+										'meta'   => $meta,
+										'image'  => $image,
+										'video'  => $video,
+										'audio'  => $audio,
+										'attach' => array_slice($attach,0,4),
+										'text'   => $m->message,
+										'social' => array(
+											'share'   => $share,
+											'comment' => $comment,
+											'like'    => $like,
+											),
+										'user'   => array(
+											'id'       => $u->idu,
+											'username' => (isset($u->username))?$u->username:'',
+											'name'     => $u->first_name,
+											'image'    => ($u->image)?"/thumb.php?w=50&h=50&t=a&src=".$u->image:'/thumb.php?w=50&h=50&t=a&src=default.png',
+											'phone'    => $u->phone,
+											),
+									);
+								}
+							}
+						}
+					}
+				}
+				Response::json($array);
+			}
+		}
+		exit;
+	}
+	public function zipcode(){
+		if(AJAX_REQUEST){
+			$array = array();
+			if(POST){
+				$input    = input();
+				$keyword  = string::slug($in->keyword);
+				$select = "full_name, MATCH(full_name) AGAINST ('".$in->keyword."') AS score";
+				$keywords = explode("-", $keyword);
+				$where    = array();
+				for ($i=0; $i < count($keywords); $i++) $where[] = "slug LIKE '%".$keywords[$i]."%'";
+				$where = implode(" OR ", $where);
+				//die($where);
+				//$fetch = Model_Group::fetch(array($where),10);
+				explode(",",$group["map"]);
+				if ($fetch) foreach ($fetch as $f) {
+					$array[] = array(
+						'address' => $f->name.", ".$f->address,
+						'map' => explode(",",$f->map)
+						);
+				}
+				//$array[]=$f->name.", ".$f->address;
+				// Zipcode
+				// //
+				$fetch = Model_Zipcode::select('fetch',$select,0,array(),10,0,array('score' => 'DESC'));
+				//die(var_dump($fetch));
+
+				if ($fetch) foreach ($fetch as $f) $array[]=$f;
+			}
+			Response::json(array_slice($array, 0, 10));
+			exit;
+		}
+	}
+}

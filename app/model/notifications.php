@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `notifications` (
  * @package default
  * @author
  **/
-class Model_Notifications extends ORM
+class Model_Notifications extends APCORM
 {
   public static $t = 'notifications'; // Table
   //public static $k = 'id'; // Default 'id' , PRIMARY KEY AUTO_INCREMENT

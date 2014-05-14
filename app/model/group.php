@@ -44,7 +44,12 @@ CREATE TABLE IF NOT EXISTS `city` (
  * @package default
  * @author
  **/
-class Model_Group extends ORM
+class Model_Group extends APCORM
 {
-  public static $t = 'group';
+  public static $t = 'groups';
+  public static $f = 'group_id'; // FOREIGN KEY
+  public static $h = array(
+		'tagsgroup' => 'Model_TagsGroup',
+		'tagsauto'  => 'Model_TagsAuto'
+		);
 } // END class

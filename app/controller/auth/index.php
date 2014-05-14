@@ -37,50 +37,35 @@ class Controller_Auth_Index extends Controller
 		exit;
 	}
 
-	public function status() {
-		exit;
-		//return Response::json(Auth::check());
-	}
-
 	public function login()
 	{
 		if(AJAX_REQUEST){
-			if(POST){
-				$request = input();
-				$a = sprintf(
-					"`username` = '%s' OR `email` = '%s' OR `phone` = '%s'",
-					$request->email, $request->email, $request->email);
-				$find = array($a);
-				$fetch = Model_User::fetch($find,1);
-				if ($fetch){
-					$auth = $fetch[0];
-					if ($auth->password == md5($request->password)){
-						$user = array();
-						foreach((array)$auth->d as $k => $v){
-							if ($k != 'password') $user[$k] = $v;
-						}
-						cookie::set('user',serialize((array)$request));
-						Response::json(array('user' => $user, 'flash' => 'Login success'));
-					}
-					else{
-						Response::json(array('flash' => 'Invalid username or password'), 401);
-					}
-				} else{
-					Response::json(array('flash' => 'Invalid username'), 401);
-				}
-			}
-			else{
-				$tpl = new Template("auth/login");
-				echo $tpl->make();
-			}
+			$tpl = new Template("login");
+			echo $tpl->make();
 			exit;
 		}
 	}
-
-	public function logout()
+	public function account()
 	{
-		cookie::set('user',NULL);
-		Response::json(array('flash' => 'Logged Out!'));
-		exit;
+		if(AJAX_REQUEST){
+			$tpl = new Template("account");
+			echo $tpl->make();
+			exit;
+		}
+	}
+	public function update()
+	{
+		if(AJAX_REQUEST){
+			$tpl = new Template("update");
+			echo $tpl->make();
+			exit;
+		}
+	}
+	public function newpassword(){
+		if(AJAX_REQUEST){
+			$tpl = new Template("newpassword");
+			echo $tpl->make();
+			exit;
+		}
 	}
 } // END class
