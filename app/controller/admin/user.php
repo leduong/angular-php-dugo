@@ -146,35 +146,41 @@ class Controller_Admin_User extends Controller
 		$this->content->message = NULL;
 		$rules = array();
 		$fields = array(
-			'username' => array('div' => array('class' => 'control-group')),
-			'email' => array('div' => array('class' => 'control-group')),
-			'password' => array('type' => 'password', 'div' => array('class' => 'control-group')),
+			'username'   => array('div' => array('class' => 'control-group')),
+			'email'      => array('div' => array('class' => 'control-group')),
+			'password'   => array('div' => array('class' => 'control-group')),
 			'first_name' => array('div' => array('class' => 'control-group')),
-			'last_name' => array('div' => array('class' => 'control-group')),
-			'phone' => array('div' => array('class' => 'control-group')),
-			'website' => array('div' => array('class' => 'control-group')),
+			'last_name'  => array('div' => array('class' => 'control-group')),
+			'phone'      => array('div' => array('class' => 'control-group')),
+			'website'    => array('div' => array('class' => 'control-group')),
 			'submit' => array('type' => 'submit', 'value' => lang('register'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 
 		$validation = new Validation();
 
 		if($validation->run($rules)){
-			$find = array('username' => post('email'));
-			$find = array('email' => post('email'));
-			$count = Model_User::count($find);
+			$email = trim(strtolower(post('email')));
+			$username = string::slug(post('username'));
+			$phone = numify(post('phone'));
+			$array = array();
+			if ($email) $array[]    = "email = '$email'";
+			if ($phone) $array[]    = "phone = '$phone'";
+			if ($username) $array[] = "username = '$username'";
+			$where = implode("OR", $array);
+			$count = Model_User::count(array($where,"disable" => "0"));
 			if($count>0){
 				$this->content->message = lang('already_registered');
 			}else{
 				$u = new Model_User();
-				$u->username = string::slug(post('username'));
-				$u->email = post('email');
-				$u->password = md5(post('password'));
+				$u->username   = $username;
+				$u->email      = post('email');
+				$u->password   = md5(post('password'));
 				$u->first_name = post('first_name');
-				$u->last_name = post('last_name');
-				$u->phone = post('phone');
-				$u->website = post('website');
-
+				$u->last_name  = post('last_name');
+				$u->phone      = post('phone');
+				$u->website    = post('website');
 				$u->save();
+
 				$this->content->message = lang('successfully_registered');
 				$this->content->form = NULL;
 				/*
@@ -203,22 +209,22 @@ class Controller_Admin_User extends Controller
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('user_form');
 		$this->content->message = NULL;
-		$rules = array(
-		);
 
+		$rules = array();
 		$validation = new Validation();
 
 		if($validation->run($rules)){
-			$u = new Model_User(post('key'));
-			$u->username = string::slug(post('username'));
-			$u->email = post('email');
-			if (post('password')) $u->password = md5(post('password'));
+			$u             = new Model_User(post('key'));
+			$u->email      = post('email');
+			$u->phone      = post('phone');
+			$u->website    = post('website');
+			$u->username   = string::slug(post('username'));
+			$u->last_name  = post('last_name');
 			$u->first_name = post('first_name');
-			$u->last_name = post('last_name');
-			$u->phone = post('phone');
-			$u->website = post('website');
+			if (!empty(post('password'))) {$u->password = md5(post('password'));};
 
 			$u->save();
+
 			$this->content->message = lang('successfully_update');
 			$this->content->form = NULL;
 			/*
@@ -235,19 +241,58 @@ class Controller_Admin_User extends Controller
 		}
 		$c = new Model_User(get('edit'));
 		$fields = array(
-			'key' => array('type' => 'hidden', 'value' => $c->idu, 'div' => array('class' => 'control-group')),
-			'username' => array('value' => $c->username, 'div' => array('class' => 'control-group')),
-			'email' => array('value' => $c->email, 'div' => array('class' => 'control-group')),
-			'password' => array('type' => 'password', 'description' => lang('blank_is_no_change'), 'div' => array('class' => 'control-group')),
+			'key'        => array('type' => 'hidden', 'value' => $c->idu, 'div' => array('class' => 'control-group')),
+			'username'   => array('value' => $c->username, 'div' => array('class' => 'control-group')),
+			'email'      => array('value' => $c->email, 'div' => array('class' => 'control-group')),
+			'password'   => array('type' => 'password', 'description' => lang('blank_is_no_change'), 'div' => array('class' => 'control-group')),
 			'first_name' => array('value' => $c->first_name, 'div' => array('class' => 'control-group')),
-			'last_name' => array('value' => $c->last_name, 'div' => array('class' => 'control-group')),
-			'phone' => array('value' => $c->phone, 'div' => array('class' => 'control-group')),
-			'website' => array('value' => $c->website, 'div' => array('class' => 'control-group')),
-			'submit' => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
+			'last_name'  => array('value' => $c->last_name, 'div' => array('class' => 'control-group')),
+			'phone'      => array('value' => $c->phone, 'div' => array('class' => 'control-group')),
+			'website'    => array('value' => $c->website, 'div' => array('class' => 'control-group')),
+			'submit'     => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
 		);
 
 		$form = new Form($validation, array('id' => 'register', 'enctype' => 'multipart/form-data', 'class' => 'form-horizontal'));
 		$form->fields($fields);
 		$this->content->form = $form;
+	}
+
+	public function ajax(){
+		$sSearch = string::slug(get('sSearch'));
+		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
+		$limit  = get('iDisplayLength');
+		$offset = get('iDisplayStart');
+		$sort   = array('idu' => 'DESC');
+		$where  = array("idu LIKE '%$sSearch%' OR email LIKE '%$sSearch%' OR first_name LIKE '%$sSearch%' OR phone LIKE '%$sSearch%'", 'disable' => '0');
+		$total  = Model_User::count($where);
+
+		$array  = array();
+		$output = array(
+			"sEcho" => intval(get('sEcho')),
+			"iTotalRecords" => $total,
+			"iTotalDisplayRecords" => $total,
+			"aaData" => array()
+		);
+		$users = Model_User::fetch($where, $limit, $offset, $sort);
+		if ($users) foreach ($users as $a) {
+			$input = '<input type="checkbox" name="selected[]" class="checkboxes" value="'.$a->idu.'" />';
+			$onoff = ($a->verified)?'<b>True</b>':'False';
+			$action = '<a title="Edit" href="/admin/user/edit/'.$a->idu.'"><i class="icon-pencil"></i></a>';
+			$array[] = array(
+				$input,
+				$a->idu,
+				$a->first_name,
+				$a->email,
+				$a->phone,
+				$onoff,
+				$action
+				);
+		}
+		Response::json(array(
+						"sEcho"                => intval(get('sEcho')),
+						"iTotalRecords"        => $total,
+						"iTotalDisplayRecords" => $total,
+						"aaData"               => $array));
+		exit;
 	}
 }

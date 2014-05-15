@@ -46,6 +46,7 @@ class Controller_Auth_Index extends Controller
 					$user = array();
 					foreach((array)$auth->to_array() as $k => $v) if ($k != 'password') $user[$k] = trim($v);
 					cookie::set('user',serialize($user));
+					Cache::delete($a);
 			}
 			$txt .= "var user = JSON.stringify(".json_encode($user).");\n";
 			$txt .= "localStorage.setItem('user', user);\n";

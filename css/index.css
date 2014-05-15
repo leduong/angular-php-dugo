@@ -1117,6 +1117,15 @@ li.active .nav-sale {
 	padding: 5px;
 }
 
+.follows h5:after {
+	content: ", ";
+	margin-right: 0;
+}
+
+.follows h5:last-child:after {
+	content: "";
+}
+
 .follows .uppercase {
 	font-size: 9pt;
 	margin-bottom: 3px;
