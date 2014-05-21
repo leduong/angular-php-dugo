@@ -35,12 +35,12 @@ class Controller_Api_Message extends Controller
 
 			if (isset($in->content)){
 				$db = registry('db');
-				$query = "SELECT name, MATCH(name) AGAINST (? IN BOOLEAN MODE) AS score
+				$query = "SELECT name, ((MATCH(name) AGAINST (? IN BOOLEAN MODE))/(LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) + 1)) as percent
 						FROM tags_auto
-						WHERE $group AND MATCH(name) AGAINST (? IN BOOLEAN MODE)
-						ORDER BY `score` DESC
+						WHERE $group AND (((MATCH(name) AGAINST (? IN BOOLEAN MODE))/(LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) + 1)) > ?)
+						ORDER BY `percent` DESC
 						LIMIT $offset, $limit";
-				$fetch = $db->fetch($query, array($in->content, $in->content));
+				$fetch = $db->fetch($query, array($in->content, $in->content, $this->appsite['min_match_word_pct']));
 				foreach ($fetch as $f) $tags[] = $f->name;
 				if ($tags){
 					Response::json(array('tags' => $tags, 'price' => vnprice($in->content)));
@@ -169,7 +169,7 @@ class Controller_Api_Message extends Controller
 	{
 		if(AJAX_REQUEST){
 			if(POST){
-				$tags = $local = $meta = $comments = $image = $video = $audio = $attach = array();
+				$tags = $group = $local = $meta = $comments = $image = $video = $audio = $attach = array();
 				$in = input();
 				$id = str_replace('.html','',$in->id);
 				if (int($id)) {
@@ -179,7 +179,7 @@ class Controller_Api_Message extends Controller
 					$m = end($m);
 				}
 				// Message
-				if (isset($m)){
+				if (isset($m->id)){
 					// User
 					$u  = new Model_User($m->uid);
 
@@ -196,15 +196,17 @@ class Controller_Api_Message extends Controller
 					}
 					$_tags = array();
 					if($ar = @explode(',',$m->tag)) foreach ($ar as $a) if($x=trim($a)){
-						if ($b = Model_Group::fetch(array('name' => $x))){
+						if ($b = Model_Group::fetch(array('slug' => string::slug($x)),1)){
 							$meta["local"][string::slug($x)] = $x;
+							$g = explode(",",$b[0]->name.",".$b[0]->long_name);
+							foreach ($g as $v) if ($y=trim($v)) $group[]=$y;
 						} else {
 							$_tags = array_merge($_tags,Model_TagsGroup::get_array($x));
 						}
 					}
 					//die(dump($_tags));
 
-					if ($ar = array_unique($_tags)) foreach ($ar as $a) $tags[string::slug($a)] = trim($a);
+					if ($ar = array_diff(array_unique($_tags),$group)) foreach ($ar as $a) $tags[string::slug($a)] = trim($a);
 
 					//
 					$where   = array('msg_id' => $m->id);

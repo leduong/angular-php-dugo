@@ -97,7 +97,7 @@ class Controller_Api_Tag extends Controller
 						else if($fetch = Model_City::fetch(array('slug' => $slug),1)){
 							$a             = end($fetch);
 							$same = Model_TagsGroup::get_array($slug);
-							$array['long_name'] = $same[0];
+							$array['long_name'] = implode(", ", $same);
 							$array['map']  = explode(",",$a->map);
 							$array['type'] = "city";
 						}

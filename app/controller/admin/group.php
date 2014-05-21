@@ -28,7 +28,7 @@ class Controller_Admin_Group extends Controller
 			$input = '<input type="checkbox" name="selected[]" class="checkboxes" value="'.$g->id.'" />';
 			$onoff = ($g->enable)?'On':'Off';
 			$gmap = ($g->map)?'<a target="_blank" href="http://maps.googleapis.com/maps/api/staticmap?center='.str_replace(" ", "", $g->map).'&markers='.str_replace(" ", "", $g->map).'&zoom=15&size=640x640&sensor=false">[Map]</a>':'';
-			$action = '<a title="Edit" href="/admin/group/edit/'.$g->id.'"><i class="icon-pencil"></i></a> - <a title="Merge" href="/admin/group/merge/'.$g->id.'"><i class="icon-exchange"></i>';
+			$action = '<a title="Edit" href="/admin/group/edit/'.$g->id.'"><i class="icon-pencil"></i></a> - <a title="Merge" href="/admin/group/merge/'.$g->id.'"><i class="icon-exchange"></i></a>';
 			$array[] = array(
 				$input,
 				$g->id,

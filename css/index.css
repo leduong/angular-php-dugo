@@ -450,31 +450,6 @@ li.active .nav-sale {
 	background-color: #0d2456 9;
 }
 
-/* Tags */
-.tags {
-	position: absolute;
-	bottom: 5px;
-	left: 5px;
-	height: auto;
-}
-
-.tags .btn-tag {
-	border: 1px solid transparent;
-	background-color: rgba(0, 0, 0, 0.45);
-	background-image: none;
-	color: #ffffff;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.75);
-	margin: 3px 3px 0 0;
-	font-size: 10pt;
-	padding: 3px 3px;
-	font-weight: normal;
-	display: inline-block;
-}
-
-.tags .btn-tag:last-child {
-	margin-right: 0;
-}
-
 /* Button */
 .callsms {
 	padding: 2pt 0;
@@ -538,6 +513,31 @@ li.active .nav-sale {
 	display: block;
 	overflow: hidden;
 	position: relative;
+}
+
+/* Tags */
+.column .tags {
+	position: absolute;
+	bottom: 5px;
+	left: 5px;
+	height: auto;
+}
+
+.column .tags .btn-tag {
+	border: 1px solid transparent;
+	background-color: rgba(0, 0, 0, 0.45);
+	background-image: none;
+	color: #ffffff;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.75);
+	margin: 3px 3px 0 0;
+	font-size: 10pt;
+	padding: 3px 3px;
+	font-weight: normal;
+	display: inline-block;
+}
+
+.column .tags .btn-tag:last-child {
+	margin-right: 0;
 }
 
 .column div.dropdown {
@@ -714,41 +714,15 @@ li.active .nav-sale {
 
 /* Search */
 .search {
-	padding-top: 5px;
-	margin-top: 0px;
+	background-color: #fefcbf;
 }
-
 .search form {
-	margin: 0;
-	position: relative;
-	background-color: #e3e3e3;
-	padding: 0 5px;
-
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-ms-box-sizing: border-box;
-	box-sizing: border-box;
+	padding: 5px;
 }
-
-.search form input {
-	padding: 7px 0 7px 30px;
-	font-size: 12pt;
-	width: 100%;
-	background-color: #fefefe;
-	color: #bababa;
-	border: 0;
-}
-
-.search form input:focus {
-	background-color: #ffffff;
-	color: #111111;
-}
-
-.search .icon {
-	position: absolute;
-	top: 14px;
-	left: 16px;
-	color: #999;
+.search .follows .content{
+	background-color: #fefcbf;
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }
 
 /* Group */
@@ -1117,13 +1091,26 @@ li.active .nav-sale {
 	padding: 5px;
 }
 
-.follows h5:after {
-	content: ", ";
-	margin-right: 0;
+.follows h5 span{
+	margin-left: 0;
 }
 
-.follows h5:last-child:after {
+.follows h5 span:after{
 	content: "";
+	margin-left: 0;
+}
+.follows h5 span:before {
+	content: ", ";
+	margin-left: 0;
+}
+
+.follows h5 span:first-child:before {
+	content: "";
+	margin-left: 0;
+}
+
+.follows h5 span:last-child:before {
+	content: " và ";
 }
 
 .follows .uppercase {
@@ -1282,57 +1269,73 @@ li.active .nav-sale {
 
 }
 
-.bootstrap .tags {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-  position: relative;
-  top: auto;
-  left: auto;
+.ngTags {
+    position: relative;
+}
+.ngTags .tags {
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    font-size: 14px;
+    cursor: text;
+    position: relative;
+    padding: 2px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
-.bootstrap .tags.focused {
-  border-color: #66afe9;
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);
+.ngTags .tags .tag-list {
+    margin: 0px;
+    padding: 0px;
+    overflow: visible;
+    list-style-type: none;
 }
 
-.bootstrap .tags .tag-item {
-  background: #428bca;
-  border: 1px solid #357ebd;
-  border-radius: 4px;
-  color: #fff;
+.ngTags .tags .tag-item {
+	background: #428bca;
+	border: 1px solid #357ebd;
+	border-radius: 1px;
+	color: #fff;
+    margin: 2px;
+    padding: 3px 0 3px 4px;
+    display: inline-block;
+    line-height: 1.3;
+    float: left;
 }
 
-.bootstrap .tags .tag-item.selected {
-  background: #d9534f;
-  border: 1px solid #d43f3a;
-  border-radius: 4px;
-  color: #fff;
+.ngTags .tags .tag-item span {
+	font-size: 10pt;
+	margin-right: 0;
+	padding-right: 0;
 }
 
-.bootstrap .tags .tag-item button {
-  background: transparent;
-  color: #000;
-  opacity: .4;
+.ngTags .tags .tag-item button {
+    margin: 0px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    vertical-align: middle;
+    background: transparent;
+    color: #000;
+    opacity: .4;
 }
 
-.bootstrap .autocomplete {
-  border-radius: 4px;
+.ngTags .tags .tag-item button:active {
+    color: #ff0000;
 }
 
-.bootstrap .autocomplete .suggestion-item.selected {
-  color: #262626;
-  background-color: #e9e9e9;
+.ngTags .tags .tag-input {
+    border: 0px;
+    outline: none;
+    margin: 3px 2px;
+    padding: 3px 0px 3px 4px;
+    float: left;
+    font-size: 10pt;
 }
 
-.bootstrap .autocomplete .suggestion-item em {
-  font-weight: normal;
-  background-color: #ffff00;
-}
-
-.bootstrap .autocomplete .suggestion-item.selected em {
-  color: #262626;
-  background-color: #ffff00;
+.ngTags .tags input::-ms-clear {
+    display: none;
 }

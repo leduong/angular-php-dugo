@@ -25,7 +25,7 @@ class Controller_Admin_Tags extends Controller
 				if ($del) foreach ($del as $d) $d->delete();
 			}*/
 
-			if ($csv) {
+			if (count($csv)>0) {
 				$del = Model_TagsAuto::fetch(array('group_id' => '0'));
 				if ($del) foreach ($del as $d) $d->delete();
 
@@ -37,7 +37,7 @@ class Controller_Admin_Tags extends Controller
 				}
 			}
 
-			if ($txt) {
+			if (count($txt)>0) {
 				$del = Model_TagsGroup::fetch(array('group_id' => '0'));
 				if ($del) foreach ($del as $d) $d->delete();
 
@@ -51,8 +51,8 @@ class Controller_Admin_Tags extends Controller
 
 						//$del = Model_TagsGroup::fetch(array('group_id' => '0', implode(" OR ", $q)));
 						//if ($del) foreach ($del as $d) $d->delete();
-						/*$del = Model_Tags::fetch(array(implode(" OR ", $q)));
-						if ($del) foreach ($del as $d) $d->delete();*/
+						$del = Model_Tags::fetch(array(implode(" OR ", $q)));
+						if ($del) foreach ($del as $d) $d->delete();
 						$result[] = "$a => Ok";
 					} elseif (strtolower($b[0])==='peer'){
 						$c = explode(",", $b[1]);
