@@ -25,7 +25,7 @@ class Controller_Admin_Tags extends Controller
 				if ($del) foreach ($del as $d) $d->delete();
 			}*/
 
-			if (count($csv)>0) {
+			if (count($csv)>1) {
 				$del = Model_TagsAuto::fetch(array('group_id' => '0'));
 				if ($del) foreach ($del as $d) $d->delete();
 
@@ -37,7 +37,7 @@ class Controller_Admin_Tags extends Controller
 				}
 			}
 
-			if (count($txt)>0) {
+			if (count($txt)>1) {
 				$del = Model_TagsGroup::fetch(array('group_id' => '0'));
 				if ($del) foreach ($del as $d) $d->delete();
 

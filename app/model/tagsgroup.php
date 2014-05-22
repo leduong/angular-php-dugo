@@ -79,25 +79,26 @@ class Model_TagsGroup extends APCORM
 
 	public static function get_all($name){
 		$slug  = string::slug($name);
-		$fetch = Model_TagsGroup::fetch(array('slug' => $slug),1);
+		$fetch = Model_TagsGroup::fetch(array('slug' => $slug));
 		if ($fetch){
 			$ar = array();
-			$t  = end($fetch);
-			if($t->tag_id==0){
-				$t->load();
-				$tags = $t->tags();
-				$ar[$t->slug] = $t->name;
-				if($tags)foreach ($tags as $a) if($a->slug&&$a->name) $ar[$a->slug] = $a->name;
-			} elseif ($t->peer==1) {
-				$g = new Model_TagsGroup($t->tag_id);
-				if (isset($g->id)){
-					$g->load();
-					$tags = $g->tags();
-					$ar[$g->slug] = $g->name;
+			foreach ($fetch as $t) {
+				if($t->tag_id==0){
+					$t->load();
+					$tags = $t->tags();
+					$ar[$t->slug] = $t->name;
 					if($tags)foreach ($tags as $a) if($a->slug&&$a->name) $ar[$a->slug] = $a->name;
+				} elseif ($t->peer==1) {
+					$g = new Model_TagsGroup($t->tag_id);
+					if (isset($g->id)){
+						$g->load();
+						$tags = $g->tags();
+						$ar[$g->slug] = $g->name;
+						if($tags)foreach ($tags as $a) if($a->slug&&$a->name) $ar[$a->slug] = $a->name;
+					}
+				} else {
+					$ar[$t->slug] = $t->name;
 				}
-			} else {
-				$ar[$t->slug] = $t->name;
 			}
 			return $ar;
 		}

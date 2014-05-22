@@ -279,7 +279,7 @@ class Controller_Api_Search extends Controller
 			$city = $group = $topic = $agent = array();
 			if ($ar = Model_City::fetch(array(),5,0,array('sort' => 'DESC'))) foreach ($ar as $a) $city[]  = array('text' => $a->name, 'slug' => $a->slug);
 			if ($ar = Model_Group::fetch(array(),5,0,array('hits' => 'DESC'))) foreach ($ar as $a) $group[] = array('text' => $a->name, 'slug' => $a->slug);
-			if ($ar = Model_TagsAuto::fetch(array(),5,0,array('hits' => 'DESC')))foreach ($ar as $a) $topic[] = array('text' => $a->name, 'slug' => $a->slug);
+			if ($ar = Model_TagsAuto::fetch(array('group_id' => 0),5,0,array('hits' => 'DESC')))foreach ($ar as $a) $topic[] = array('text' => $a->name, 'slug' => $a->slug);
 
 			Response::json(array(
 				'city' => $city,
