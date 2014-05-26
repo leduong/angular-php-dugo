@@ -252,6 +252,7 @@ class Controller_Admin_Group extends Controller
 			$ar = explode(",", implode(",", array($c->name,$c->long_name,$c->tag)));
 			foreach (array_unique($ar) as $a) if ($b=trim($a)) $old_tags[] = $b;
 			$old_name = $c->name;
+			$old_tagsname = explode(",", implode(",", array($c->name,$c->long_name)));
 			$where    = implode(' OR ', Model_TagsGroup::get_query($old_name));
 
 			/*if ($found = Model_TagsAuto::count(array($where))){
@@ -273,7 +274,7 @@ class Controller_Admin_Group extends Controller
 			$x = array();
 			$ar = explode(",", post('tag'));
 			foreach (array_unique($ar) as $a) if ($b=trim($a)) $x[] = $b;
-			//$c->tag = implode(",", $x); Khong save tag edit
+			// $c->tag = implode(",", $x); //Khong save tag edit
 			// Save
 			$c->save();
 
@@ -326,10 +327,10 @@ class Controller_Admin_Group extends Controller
 						Model_Messages::rebuild($m->id);
 					}
 				}
-
-
 			}
-			if ($diff = array_diff($old_tags, $new_tags)){
+
+			$new_tagsname = explode(",", implode(",", array($c->name,$c->long_name)));
+			if ($diff = array_diff($old_tagsname, $new_tagsname)){
 				$x = array();
 				foreach ($diff as $a) if ($b=string::slug($a)) $x[] = "slug = '$b'";
 				$where = implode(" OR ", $x);
@@ -347,7 +348,7 @@ class Controller_Admin_Group extends Controller
 			'other_name'  => array('value' => $c->long_name, 'div' => array('class' => 'control-group')),
 			'address'     => array('value' => $c->address, 'div' => array('class' => 'control-group')),
 			'local'       => array('value' => $c->local, 'div' => array('class' => 'control-group')),
-			'tag'         => array('value' => $c->tag, 'attributes' => array('disabled' => 'disabled'), 'div' => array('class' => 'control-group')),
+			'tag'         => array('value' => $c->tag, 'div' => array('class' => 'control-group')),
 			'map'         => array('value' => $c->map, 'div' => array('class' => 'control-group')),
 			'enable'      => array('value' => $c->enable, 'check'=>$c->enable, 'type' => 'checkbox', 'div' => array('class' => 'control-group')),
 			'submit'      => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))
