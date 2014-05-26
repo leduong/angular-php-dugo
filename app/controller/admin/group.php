@@ -53,8 +53,10 @@ class Controller_Admin_Group extends Controller
 		$group = new Model_Group(get('merge'));
 		$this->content = new View('group');
 		$this->content->message = $this->content->form = NULL;
-		$tags = explode(",", $group->tag.",".$group->long_name.",".$group->name);
-		$tags = array_unique($tags);
+		$old_tags = $new_tags = array();
+		// old Tags and Name
+		$ar = explode(",", implode(",", array($group->name,$group->long_name,$group->tag)));
+		foreach (array_unique($ar) as $a) if ($b=trim($a)) $old_tags[] = $b;
 
 		$rules = array(
 			'to_group' => 'required|numeric',
@@ -72,8 +74,10 @@ class Controller_Admin_Group extends Controller
 		if($validation->run($rules)){
 			$new = new Model_Group(post('to_group'));
 			if ($new){
-				$new_tags = @explode(",", $new->tag.",".$new->long_name.",".$new->name);
-				$new_tags = array_unique($new_tags);
+				// new_tags
+				$ar = explode(",", implode(",", array($new->name,$new->long_name,$new->tag)));
+				foreach (array_unique($ar) as $a) if ($b=trim($a)) $new_tags[] = $b;
+
 				$db = registry('db');
 				$where = implode(' OR ', Model_TagsGroup::get_query($group->name));
 				$query = "SELECT messages.id,
@@ -86,7 +90,7 @@ class Controller_Admin_Group extends Controller
 				if ($fetch = $db->fetch($query)) foreach ($fetch as $o) {
 					$m = new Model_Messages($o->id);
 					if (isset($m->id)) {
-						$m_tags = array_diff($tags, @explode(",", $m->tag));
+						$m_tags = array_diff(@explode(",", $m->tag), $old_tags);
 						$m->tag = implode(",", array_unique(array_merge($new_tags,$m_tags)));
 						$m->save();
 						$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id, 'type' => "local"),1);
@@ -132,6 +136,7 @@ class Controller_Admin_Group extends Controller
 			$this->content->pagination = $pagination;
 		}
 	}
+
 	public function delete()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
@@ -140,6 +145,13 @@ class Controller_Admin_Group extends Controller
 		if (isset($selected)) foreach($selected as $s){
 			if($s>1){
 				$c = new Model_Group($s);
+				if ($ar = explode(",", $c->name.",".$c->long_name)){
+					$x = array();
+					foreach ($ar as $a) if ($b=string::slug($a)) $x[] = "slug = '$b'";
+					$where = implode(" OR ", $x);
+					$del = Model_Tags::fetch(array($where));
+					if ($del) foreach ($del as $d) $d->delete();
+				}
 				$c->delete();
 			}
 		}
@@ -167,6 +179,7 @@ class Controller_Admin_Group extends Controller
 	}
 	public function create()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('group');
 		$this->content->message = NULL;
@@ -234,29 +247,34 @@ class Controller_Admin_Group extends Controller
 		$validation = new Validation();
 		if($validation->run($rules))
 		{
-			// Old
-			$tag = array();
-			$old_tags = explode(",", $c->tag.",".$c->long_name.",".$c->name);
-			$old_tags = array_unique($old_tags);
-			$where = implode(' OR ', Model_TagsGroup::get_query($c->name));
+			$old_tags = $new_tags = array();
+			// old Tags and Name
+			$ar = explode(",", implode(",", array($c->name,$c->long_name,$c->tag)));
+			foreach (array_unique($ar) as $a) if ($b=trim($a)) $old_tags[] = $b;
+			$old_name = $c->name;
+			$where    = implode(' OR ', Model_TagsGroup::get_query($old_name));
 
-			// Save
-			$c->map       = post('map');
+			/*if ($found = Model_TagsAuto::count(array($where))){
+				Response::json(array('flash' => "Tên \"$v\" đã được sử dụng"),403);
+				exit;
+			}*/
 
-			$c->name      = post('name');
+			// save to obj
+			$c->map       = trim(post('map'));
+			$c->name      = trim(post('name'));
 			$c->slug      = string::sanitize_url(post('name'));
-			$c->local     = post('local');
+			$c->local     = trim(post('local'));
 			$c->enable    = post('enable')?1:0;
-			$c->address   = post('address');
-			$c->long_name = post('other_name');
+			$c->address   = trim(post('address'));
+			$c->long_name = trim(post('other_name'));
 
 			// fix unique tag
-			$x = explode(",", post('tag'));
-			$y = explode(",", $c->long_name.",".$c->name);
-			$z = array_unique(array_diff($x, $y));
-			foreach ($z as $v) if ($b=trim($v)) $tag[] = $b;
-			$c->tag = implode(",", $tag);
-
+			// new tag
+			$x = array();
+			$ar = explode(",", post('tag'));
+			foreach (array_unique($ar) as $a) if ($b=trim($a)) $x[] = $b;
+			//$c->tag = implode(",", $x); Khong save tag edit
+			// Save
 			$c->save();
 
 			// Model_TagsAuto && Model_Tags
@@ -277,9 +295,10 @@ class Controller_Admin_Group extends Controller
 
 
 			// Update
-			$new_tags = @explode(",", $c->tag.",".$c->long_name.",".$c->name);
-			$new_tags = array_unique($new_tags);
-			if (array_diff($old_tags, $new_tags)){
+			$ar = explode(",", implode(",", array($c->name,$c->long_name,$c->tag)));
+			foreach (array_unique($ar) as $a) if ($b=trim($a)) $new_tags[] = $b;
+
+			if (array_diff($new_tags, $old_tags)){
 				$db = registry('db');
 				$query = "SELECT messages.id,
 						   COUNT(*) AS occurrences
@@ -291,8 +310,8 @@ class Controller_Admin_Group extends Controller
 				if ($fetch = $db->fetch($query)) foreach ($fetch as $o) {
 					$m = new Model_Messages($o->id);
 					if (isset($m->id)) {
-						$m_tags = array_diff($old_tags, @explode(",", $m->tag));
-						$m->tag = implode(",", array_unique(array_merge($new_tags,$m_tags)));
+						$m_diff = array_diff(@explode(",", $m->tag),$old_tags);
+						$m->tag = implode(",", array_unique(array_merge($new_tags,$m_diff)));
 						$m->save();
 						$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id, 'type' => "local"),1);
 						if ($mt){
@@ -307,6 +326,15 @@ class Controller_Admin_Group extends Controller
 						Model_Messages::rebuild($m->id);
 					}
 				}
+
+
+			}
+			if ($diff = array_diff($old_tags, $new_tags)){
+				$x = array();
+				foreach ($diff as $a) if ($b=string::slug($a)) $x[] = "slug = '$b'";
+				$where = implode(" OR ", $x);
+				$del = Model_Tags::fetch(array($where));
+				if ($del) foreach ($del as $d) $d->delete();
 			}
 
 			$this->content->message = lang('success');
@@ -319,7 +347,7 @@ class Controller_Admin_Group extends Controller
 			'other_name'  => array('value' => $c->long_name, 'div' => array('class' => 'control-group')),
 			'address'     => array('value' => $c->address, 'div' => array('class' => 'control-group')),
 			'local'       => array('value' => $c->local, 'div' => array('class' => 'control-group')),
-			'tag'         => array('value' => $c->tag, 'div' => array('class' => 'control-group')),
+			'tag'         => array('value' => $c->tag, 'attributes' => array('disabled' => 'disabled'), 'div' => array('class' => 'control-group')),
 			'map'         => array('value' => $c->map, 'div' => array('class' => 'control-group')),
 			'enable'      => array('value' => $c->enable, 'check'=>$c->enable, 'type' => 'checkbox', 'div' => array('class' => 'control-group')),
 			'submit'      => array('type' => 'submit', 'value' => lang('save'), 'class'=>'btn blue', 'div' => array('class' => 'form-actions'))

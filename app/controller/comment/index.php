@@ -50,14 +50,18 @@ class Controller_Comment_Index extends Controller
 				$m = end($m);
 			}
 			if($m){
-				$meta = array();
+				$meta = $keywords = array();
 				$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
 				if ($mt) foreach($mt as $v) $meta[$v->type] = trim($v->value);
-				$keywords = trim(implode(", ", @explode(",", $m->tag.",".$meta['address'].",".$meta['local'])));
-				$description = substr(substr($m->message,0,256),0,strrpos(substr($m->message,0,256)," "));
-				$this->appsite['site_title'] = ($keywords)?$keywords:$description;
-				$this->appsite['meta_keywords'] = ($keywords)?$keywords:$description;
-				$this->appsite['meta_description'] = $description;
+				$ar = @explode(",", $m->tag.",".$meta['address'].",".$meta['local'].",".$this->appsite['meta_keywords']);
+				foreach ($ar as $a) if ($b=string::slug($a)) $keywords[] = str_replace("-", " ", $b);
+
+
+				$keywords = array_merge(array("Mua bán nhà đất", "Bất động sản"),$keywords);
+				foreach ($keywords as $a) if ($b=string::slug($a)) $meta_keywords[] = str_replace("-", " ", $b);
+				$this->appsite['meta_keywords']    = implode(", ", array_unique($meta_keywords));
+				$this->appsite['meta_description'] = substr(substr(str_replace("\n", " ", $m->message),0,256),0,strrpos(substr(str_replace("\n", " ", $m->message),0,256)," "));
+				$this->appsite['site_title']       = "Mua bán nhà đất, Bất động sản, ".substr(substr(str_replace("\n", " ", $m->message),0,128),0,strrpos(substr(str_replace("\n", " ", $m->message),0,128)," "));
 			}
 			$this->content = '';
 		}

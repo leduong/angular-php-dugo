@@ -49,6 +49,16 @@ class Controller_Api_Follow extends Controller
 						$follow->save();
 						Response::json(array('total' => $total+1));
 					}
+
+					// Send Notification
+					$where = implode(' OR ', Model_TagsGroup::get_query($in->follow));
+					if ($a = Model_Group::fetch(array($where),1)){
+						$a = end($a);
+						$owner = new Model_User($a->by);
+						if ($owner->email){
+							Model_Notifications::sendmail(0,$owner->email,$u['idu'],$a->name,$in->follow);
+						}
+					}
 				}
 				else Response::json(array('total' => 0), 403);
 			}

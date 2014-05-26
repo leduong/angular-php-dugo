@@ -62,11 +62,11 @@ class Controller_Tag_Index extends Controller
 				$a  = end($fetch);
 				$ar = @explode(",", $a->name);
 			}
-			$arr = array_merge($ar,$all, explode(",", $this->appsite['meta_keywords']));
-			foreach ($arr as $a) if ($b=trim($a)) $keywords[] = $b;
-			$this->appsite['site_title']       = "Mua bán nhà đất, Bất động sản ".implode(", ", array_unique($keywords));
-			$this->appsite['meta_keywords']    = "Mua bán nhà đất, Bất động sản, ".implode(", ", array_unique($keywords));
-			$this->appsite['meta_description'] = "Mua bán nhà đất, Bất động sản, ".implode(", ", array_unique($keywords));
+			$arr = array_merge(array("Mua bán nhà đất","Bất động sản "), $ar, $all, explode(",", $this->appsite['meta_keywords']));
+			foreach ($arr as $a) if ($b=string::slug($a)) $keywords[] = str_replace("-", " ", $b);
+			$this->appsite['site_title']       = implode(", ", array_unique($keywords));
+			$this->appsite['meta_keywords']    = implode(", ", array_unique($keywords));
+			$this->appsite['meta_description'] = implode(", ", array_unique($keywords));
 			$this->content = $slug;
 		}
 	}

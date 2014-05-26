@@ -8,6 +8,7 @@ class Controller_Admin_Tags extends Controller
 
 	public function upload()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('tags');
 		$this->content->message = NULL;
@@ -86,6 +87,7 @@ class Controller_Admin_Tags extends Controller
 
 	public function delete()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$selected = post('selected');
 
@@ -131,6 +133,7 @@ class Controller_Admin_Tags extends Controller
 	}
 	public function create()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('tags');
 		$this->content->message = NULL;
@@ -170,6 +173,7 @@ class Controller_Admin_Tags extends Controller
 	}
 	public function edit()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('tags');
 		$this->content->message = NULL;

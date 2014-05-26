@@ -54,6 +54,7 @@ class Controller_Admin_Messages extends Controller
 	}
 	public function create()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('messages');
 		$this->content->message = NULL;
@@ -125,7 +126,7 @@ class Controller_Admin_Messages extends Controller
 		if($validation->run($rules))
 		{
 			$c->message = post('message');
-			$c->tag     = post('tag');
+			// $c->tag     = post('tag'); khong save tag
 			$c->type    = post('type');
 			$c->value   = post('picture');
 			$c->save();
@@ -169,7 +170,7 @@ class Controller_Admin_Messages extends Controller
 			'uid'        => array('value' => $user, 'attributes' => array('disabled' => 'disabled')),
 			'type'       => array('value' => $c->type, 'type'=>'select', 'options'=>$types,),
 			'message'    => array('type' => 'textarea', 'value' => $c->message, 'div' => array('class' => 'control-group'), 'attributes' => array('rows' => 10, 'name' => 'message', 'width' => '100%')),
-			'tag'        => array('value' => $c->tag, 'div' => array('class' => 'control-group')),
+			'tag'        => array('value' => $c->tag, 'attributes' => array('disabled' => 'disabled'), 'div' => array('class' => 'control-group')),
 			'picture'    => array('value' => $c->value, 'div' => array('class' => 'control-group')),
 			'address'    => array('value' => $ms['address'], 'div' => array('class' => 'control-group')),
 			'local'      => array('value' => $ms['local'], 'div' => array('class' => 'control-group')),

@@ -52,7 +52,7 @@ class Controller_Api_User extends Controller
 
 					$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_verify'],$rand, $rand));
 					$sendsms = file_get_contents("http://center.fibosms.com/Service.asmx/SendSMS?&clientNo=CL8852&clientPass=28mCDiad&smsGUID=".uuid()."&serviceType=1&phoneNumber=$phone&smsMessage=$sms");
-					@log_message("$phone - $sms - $sendsms");
+					//@log_message("$phone - $sms - $sendsms");
 					//die();
 					Response::json(array(
 						'phone' => $phone,
@@ -205,7 +205,7 @@ class Controller_Api_User extends Controller
 					Cache::set($code,$user->idu,600);
 					$sms = str_replace(" ", "%20", sprintf($this->appsite['sms_confirm'],$rand, $code));
 					$sendsms = @file_get_contents("http://center.fibosms.com/Service.asmx/SendSMS?&clientNo=CL8852&clientPass=28mCDiad&smsGUID=".uuid()."&serviceType=1&phoneNumber=$phone&smsMessage=$sms");
-					@log_message("$phone - $sms - $sendsms");
+					//@log_message("$phone - $sms - $sendsms");
 					Response::json(array(
 						'user' => 'phone',
 						'flash' => 'Vui lòng kiểm tra tin nhắn bằng số điện thoại "'.$phone.'".'),404);
@@ -377,7 +377,7 @@ class Controller_Api_User extends Controller
 
 						Response::json(array('flash' => 'Mật khẩu mới đã được gởi đến "'.$in->user.'" và chỉ có hiệu lực trong vòng 10 phút.'));
 						$sendsms = file_get_contents("http://center.fibosms.com/Service.asmx/SendSMS?&clientNo=CL8852&clientPass=28mCDiad&smsGUID=".uuid()."&serviceType=1&phoneNumber=$phone&smsMessage=$sms");
-						@log_message("$phone - $sms - $sendsms");
+						//@log_message("$phone - $sms - $sendsms");
 						Cache::set("phone".$phone,true,600);
 					}
 				}  else {

@@ -58,6 +58,22 @@ class Controller_Api_Comment extends Controller
 								'name'     => $by->first_name,
 								'location' => '',
 								));
+
+							// Send Notification
+							$all = array($msg->uid);
+							$type = ($msg->type=='status')?6:4;
+							$link = ($msg->link)?$msg->link:$msg->id;
+							$name = substr(substr(str_replace("\n", " ", $msg->message),0,32),0,strrpos(substr(str_replace("\n", " ", $msg->message),0,32)," "));
+							$ar = Model_Comments::fetch(array('msg_id' =>$msg->id));
+							if ($ar) {
+								foreach ($ar as $a) $all[] = $a->by;
+								foreach (array_unique($all) as $a) {
+									$owner = new Model_User($a);
+									if ($owner->email&&($owner->idu!=$user['idu'])){
+										Model_Notifications::sendmail($type,$owner->email,$user['idu'],$name,$link);
+									}
+								}
+							}
 						}
 					}
 					else Response::json(array('total' => $total), 403);

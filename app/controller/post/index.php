@@ -50,11 +50,15 @@ class Controller_Post_Index extends Controller
 				$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
 				if ($mt) foreach($mt as $v) $meta[$v->type] = trim($v->value);
 				$ar = @explode(",", $m->tag.",".$meta['address'].",".$meta['local'].",".$this->appsite['meta_keywords']);
-				foreach ($ar as $a) if ($b=trim($a)) $keywords[] = $b;
+				foreach ($ar as $a) if ($b=string::slug($a)) $keywords[] = str_replace("-", " ", $b);
 
-				$this->appsite['site_title']       = "Mua bán nhà đất, Bất động sản ".implode(", ", array_slice(array_unique($keywords),0,5));
-				$this->appsite['meta_keywords']    = implode(", ", array_unique($keywords));
-				$this->appsite['meta_description'] = substr(substr($m->message,0,256),0,strrpos(substr($m->message,0,256)," "));
+
+				$keywords = array_merge(array("Mua bán nhà đất", "Bất động sản"),$keywords);
+				foreach ($keywords as $a) if ($b=string::slug($a)) $meta_keywords[] = str_replace("-", " ", $b);
+				$this->appsite['meta_keywords']    = implode(", ", array_unique($meta_keywords));
+				$this->appsite['meta_description'] = substr(substr(str_replace("\n", " ", $m->message),0,256),0,strrpos(substr(str_replace("\n", " ", $m->message),0,256)," "));
+				$this->appsite['site_title']       = "Mua bán nhà đất, Bất động sản, ".substr(substr(str_replace("\n", " ", $m->message),0,128),0,strrpos(substr(str_replace("\n", " ", $m->message),0,128)," "));
+
 			}
 			$this->content = '';
 		}

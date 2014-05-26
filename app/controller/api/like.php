@@ -55,6 +55,15 @@ class Controller_Api_Like extends Controller
 						$msg->likes = $total+1;
 						$msg->save();
 						Response::json(array('like' => True, 'total' => $total+1));
+
+						// Send Notification
+						$owner = new Model_User($msg->uid);
+						$type = ($msg->type=='status')?5:3;
+						$link = ($msg->link)?$msg->link:$msg->id;
+						$name = substr(substr(str_replace("\n", " ", $msg->message),0,32),0,strrpos(substr(str_replace("\n", " ", $msg->message),0,32)," "));
+						if ($owner->email){
+							Model_Notifications::sendmail($type,$owner->email,$u['idu'],$name,$link);
+						}
 					}
 				}
 				else Response::json(array(), 403);

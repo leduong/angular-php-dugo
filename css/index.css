@@ -150,6 +150,11 @@ hr {
 	min-width: 160px;
 }
 
+.frame{
+	width: 100%;
+	min-height: 320px;
+}
+
 .flash {
 	padding: 5px;
 	font-size: 12pt;

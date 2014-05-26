@@ -32,7 +32,6 @@ class Controller_Api_Message extends Controller
 			$offset = $limit * ($page-1);
 			$tags   = array();
 			$group = (isset($in->group))?"group_id >= 0":"group_id = 0";
-
 			if (isset($in->content)){
 				$db = registry('db');
 				$query = "SELECT name, ((MATCH(name) AGAINST (? IN BOOLEAN MODE))/(LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) + 1)) as percent
@@ -80,20 +79,29 @@ class Controller_Api_Message extends Controller
 					}
 
 
-					/*/ Auto Tags
-					$b  = array();
-					$c  = string::slug($m->message);
-					$ar = Model_TagsAuto::fetch();
-					foreach ($ar as $v) $b[] = $v->name;
-					foreach ($b as $v) if (strpos($c, string::slug($v))!==false) $tags[] = $v;
-					*/
+					/* Auto Tags */
+					$autotags = Cache::get('autotags');
+					if (!$autotags){
+						$autotags = array();
+						if ($ar = Model_TagsAuto::fetch()) foreach ($ar as $a) {
+							$autotags[$a->slug] = $a->name;
+						}
+						if ($ar = Model_TagsGroup::fetch()) foreach ($ar as $a) {
+							$autotags[$a->slug] = $a->name;
+						}
+						$autotags = array_unique($autotags);
+						Cache::set('autotags', $autotags);
+					}
 					// Check
 					if (strlen($m->message)>=3){
 						$m->uid = $u['idu'];
-
-						if(isset($tags)) $m->tag = implode(",", $tags);
-
 						$ar = array();
+						$message = string::slug($m->message);
+						foreach ($autotags as $k => $v) if (strpos($message, $k) !== false) $ar[] = $v;
+						if(isset($tags)) foreach ($tags as $t) if ($autotags[string::slug($t)]) $ar[] = $autotags[string::slug($t)];
+						$m->tag = implode(",", array_unique($ar));
+
+						$ar = array(); // reset array $ar
 						foreach (explode(',',$m->tag) as $v) if(strlen($v)>2) $ar[] = string::slug($v);
 						if (count($ar)){
 							$link = $_link = implode("/", array_slice($ar, 0, 5));
@@ -108,6 +116,18 @@ class Controller_Api_Message extends Controller
 						if (true!=Cache::get(md5(serialize((array)$in)))){
 							$m->save();
 							Cache::set(md5(serialize((array)$in)),true);
+							// Send Notification
+							$type = ($m->type=='status')?1:2;
+							foreach (explode(',',$m->tag) as $v) {
+								$where = implode(' OR ', Model_TagsGroup::get_query($v));
+								if ($a = Model_Group::fetch(array($where),1)){
+									$a = end($a);
+									$owner = new Model_User($a->by);
+									if ($owner->email){
+										Model_Notifications::sendmail($type, $owner->email, $m->uid, $a->name, $a->slug);
+									}
+								}
+							}
 						}
 
 						$link = (isset($link))?$link:$id;
@@ -200,10 +220,15 @@ class Controller_Api_Message extends Controller
 							$meta["local"][string::slug($x)] = $x;
 							$g = explode(",",$b[0]->name.",".$b[0]->long_name);
 							foreach ($g as $v) if ($y=trim($v)) $group[]=$y;
-						} else {
+						}
+						elseif ($b = Model_City::fetch(array('slug' => string::slug($x)),1)){
+							$meta["local"][string::slug($x)] = $x;
+						}
+						else {
 							$_tags = array_merge($_tags,Model_TagsGroup::get_array($x));
 						}
 					}
+					$meta["local"] = array_unique($meta["local"]);
 					//die(dump($_tags));
 
 					if ($ar = array_diff(array_unique($_tags),$group)) foreach ($ar as $a) $tags[string::slug($a)] = trim($a);
@@ -220,7 +245,7 @@ class Controller_Api_Message extends Controller
 						$comments[] = array(
 							'comment'  => nl2br($c->message),
 							'time'     => Time::show($c->time),
-							'name'     => $by->first_name,
+							'name'     => ($by->first_name)?$by->first_name:'Nhà đất #'.$by->idu,
 							'location' => '',
 							);
 					}else{
@@ -283,7 +308,7 @@ class Controller_Api_Message extends Controller
 						'user'     => array(
 							'id'       => $u->idu,
 							'username' => ($u->username)?$u->username:'',
-							'name'     => $u->first_name,
+							'name'     => ($u->first_name)?$u->first_name:'Nhà đất #'.$u->idu,
 							'image'    => ($u->image)?"http://static.nhadat.com/128/avatars/".$u->image:'http://static.nhadat.com/128/avatars/default.png',
 							'phone'    => $u->phone,
 							),

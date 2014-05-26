@@ -100,7 +100,7 @@ class Controller_Api_Search extends Controller
 						'user'   => array(
 							'id'       => $u->idu,
 							'username' => (isset($u->username))?$u->username:'',
-							'name'     => $u->first_name,
+							'name'     => ($u->first_name)?$u->first_name:'Nhà đất #'.$u->idu,
 							'image'    => ($u->image)?"/48/avatars/".$u->image:'/48/avatars/default.png',
 							'phone'    => $u->phone,
 							),
@@ -222,7 +222,7 @@ class Controller_Api_Search extends Controller
 								'user'   => array(
 									'id'       => $u->idu,
 									'username' => (isset($u->username))?$u->username:'',
-									'name'     => $u->first_name,
+									'name'     => ($u->first_name)?$u->first_name:'Nhà đất #'.$u->idu,
 									'image'    => ($u->image)?"/48/avatars/".$u->image:'/48/avatars/default.png',
 									'phone'    => $u->phone,
 									),
@@ -242,15 +242,15 @@ class Controller_Api_Search extends Controller
 			if(POST){
 				$in = input();
 				$keyword = string::slug($in->keyword);
-				$fetch = Model_Tags::fetch(array("slug LIKE '%$keyword%'"),300);
+				/*$fetch = Model_Tags::fetch(array("slug LIKE '%".$keyword."%'"));
 				if ($fetch) foreach ($fetch as $f) {
-					$all = Model_TagsGroup::get_query($f->slug);
+					$all = Model_TagsGroup::get_query($f->name);
 					$where = implode(' OR ', $all);
-					if (($a = Model_Group::fetch(array($where),1))&&($b=end($a))){
-						$group[] = array('text' => $b->name, 'slug' => $f->slug);
+					if ($a = Model_Group::fetch(array($where),1)){
+						$group[] = array('text' => $f->name, 'slug' => $f->slug);
 					}
-					elseif (($a = Model_City::fetch(array($where),1))&&($b=end($a))){
-						$city[] = array('text' => $b->name, 'slug' => $f->slug);
+					elseif ($a = Model_City::fetch(array($where),1)){
+						$city[] = array('text' => $f->name, 'slug' => $f->slug);
 					}
 					elseif (($a = Model_District::fetch(array('slug' => $f->slug),1))&&($b=end($a))){
 						$district[] = array('text' => $b->name, 'slug' => $f->slug);
@@ -261,14 +261,30 @@ class Controller_Api_Search extends Controller
 					else{
 						$topic[] = array('text' => $f->name, 'slug' => $f->slug);
 					}
+				}*/
+				if ($ar = Model_City::fetch(array("slug LIKE '%".$keyword."%'"))){
+					foreach ($ar as $a) $city[] = array('text' => $a->name, 'slug' => $a->slug);
+				}
+				if ($ar = Model_District::fetch(array("slug LIKE '%".$keyword."%'"),10)){
+					foreach ($ar as $a) $district[] = array('text' => $a->name, 'slug' => $a->slug);
+				}
+				if ($ar = Model_Zipcode::fetch(array("slug LIKE '%".$keyword."%'"),10)){
+					foreach ($ar as $a) $zipcode[] = array('text' => $a->name, 'slug' => $a->slug);
+				}
+				if ($ar = Model_TagsAuto::fetch(array("slug LIKE '%".$keyword."%'"))){
+					foreach ($ar as $a) {
+						if ($a->group_id>0){
+							$group[] = array('text' => $a->name, 'slug' => $a->slug);
+						} else $topic[] = array('text' => $a->name, 'slug' => $a->slug);
+					}
 				}
 			}
 		}
 		Response::json(array(
-				'city'     => array_unique((array)$city),
+				'city'     => $city,
 				'district' => $district,
 				'zipcode'  => $zipcode,
-				'group'    => array_unique((array)$group),
+				'group'    => $group,
 				'topic'    => $topic,
 				'agent'    => $agent)
 			);
@@ -384,7 +400,7 @@ class Controller_Api_Search extends Controller
 								'user'   => array(
 									'id'       => $u->idu,
 									'username' => (isset($u->username))?$u->username:'',
-									'name'     => $u->first_name,
+									'name'     => ($u->first_name)?$u->first_name:'Nhà đất #'.$u->idu,
 									'image'    => ($u->image)?"/48/avatars/".$u->image:'/48/avatars/default.png',
 									'phone'    => $u->phone,
 									),
@@ -461,7 +477,7 @@ class Controller_Api_Search extends Controller
 						}
 						$group            = $a->to_array();
 						$user             = new Model_User($group["by"]);
-						$array['by_name'] = (isset($user->first_name))?$user->first_name:NULL;
+						$array['by_name'] = ($user->first_name)?$user->first_name:'Nhà đất #'.$user->idu;
 						$array['name']    = $group["name"];
 						$group['map']     = explode(",",$group["map"]);
 						$array['type']    = "group";

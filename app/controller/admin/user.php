@@ -141,6 +141,7 @@ class Controller_Admin_User extends Controller
 	}
 	public function create()
 	{
+		die("Off this function by Duong");
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
 		$this->content = new View('user_create');
 		$this->content->message = NULL;
