@@ -51,10 +51,9 @@ class Controller_Api_Tag extends Controller
 									FROM tags, tags_occurrence, messages
 									WHERE messages.type = '%s' AND
 									messages.id = tags_occurrence.msg_id AND
-									tags.id = tags_occurrence.tag_id AND
-									($where)";
-							$status             = $db->column(sprintf($_q,'status'));
-							$realestate         = $db->column(sprintf($_q,'realestate'));
+									tags.id = tags_occurrence.tag_id AND tags.slug = '%s'";
+							$status     = $db->column(sprintf($_q,'status',$slug));
+							$realestate = $db->column(sprintf($_q,'realestate',$slug));
 							//die(var_dump($realestate));
 							Cache::set('realestate.'.$slug,$realestate);
 							Cache::set('status.'.$slug,$status);

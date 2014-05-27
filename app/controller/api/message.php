@@ -52,88 +52,73 @@ class Controller_Api_Message extends Controller
 	}
 	public function create()
 	{
-		if(AJAX_REQUEST){
-			if(POST){
-				$u = @unserialize(cookie::get('user'));
-				if($u['idu']){ // If exist User
-					$meta = $tags = array();
-					$in = input();
-					$m = new Model_Messages();
-					$m->date = date('Y-m-d H:i:s');
-					foreach ((array)$in as $k => $v) if($v&&$k) {
-						if( in_array($k, array('address', 'map', 'price', 'rent', 'local')) ){
-							$meta[$k] = trim($v);
-						}
-						elseif($k == 'message'){
-							$m->message = $v;
-						}
-						elseif($k == 'type'){
-							$m->type = $v;
-						}
-						elseif($k == 'tag'){
-							$tags = array_unique($v);
-						}
-						elseif($k == 'images'){
-							$m->value = implode(",", $v);
-						}
+		if(AJAX_REQUEST&&POST){
+			$u = @unserialize(cookie::get('user'));
+			if($u['idu']){ // If exist User
+				$meta = $tags = array();
+				$in = input();
+				$m = new Model_Messages();
+				$m->date = date('Y-m-d H:i:s');
+				foreach ((array)$in as $k => $v) if($v&&$k) {
+					if( in_array($k, array('address', 'map', 'price', 'rent', 'local')) ){
+						$meta[$k] = trim($v);
 					}
-
-
-					/* Auto Tags */
-					$autotags = Cache::get('autotags');
-					if (!$autotags){
-						$autotags = array();
-						if ($ar = Model_TagsAuto::fetch()) foreach ($ar as $a) {
-							$autotags[$a->slug] = $a->name;
-						}
-						if ($ar = Model_TagsGroup::fetch()) foreach ($ar as $a) {
-							$autotags[$a->slug] = $a->name;
-						}
-						$autotags = array_unique($autotags);
-						Cache::set('autotags', $autotags);
+					elseif($k == 'message'){
+						$m->message = $v;
 					}
-					// Check
-					if (strlen($m->message)>=3){
-						$m->uid = $u['idu'];
-						$ar = array();
-						$message = string::slug($m->message);
-						foreach ($autotags as $k => $v) if (strpos($message, $k) !== false) $ar[] = $v;
-						if(isset($tags)) foreach ($tags as $t) if ($autotags[string::slug($t)]) $ar[] = $autotags[string::slug($t)];
-						$m->tag = implode(",", array_unique($ar));
+					elseif($k == 'type'){
+						$m->type = $v;
+					}
+					elseif($k == 'tag'){
+						$tags = array_unique($v);
+					}
+					elseif($k == 'images'){
+						$m->value = implode(",", $v);
+					}
+				}
 
-						$ar = array(); // reset array $ar
-						foreach (explode(',',$m->tag) as $v) if(strlen($v)>2) $ar[] = string::slug($v);
-						if (count($ar)){
-							$link = $_link = implode("/", array_slice($ar, 0, 5));
-							$i = 0;
-							$check = 1;
-							while ($check = Model_Messages::fetch(array('link' => $link))){
-								$i++;
-								$link = "$_link/$i";
-							}
-							$m->link = $link;
+
+				/* Auto Tags */
+				$autotags = Cache::get('autotags');
+				if (!$autotags){
+					$autotags = array();
+					// Allow Tags of Topic
+					if ($ar = Model_TagsAuto::fetch()) foreach ($ar as $a) {
+						$autotags[$a->slug] = $a->name;
+					}
+					/*if ($ar = Model_TagsGroup::fetch()) foreach ($ar as $a) {
+						$autotags[$a->slug] = $a->name;
+					}*/
+					$autotags = array_unique($autotags);
+					Cache::set('autotags', $autotags);
+				}
+				// Check
+				if (strlen($m->message)>=3){
+					$m->uid = $u['idu'];
+					// Tags auto
+					$ar = array();
+					$message = string::slug($m->message);
+					foreach ($autotags as $k => $v) if (strpos("-$message-", "-$k-") !== false) $ar[] = $v;
+					if(isset($tags)) foreach ($tags as $t) if ($autotags[string::slug($t)]) $ar[] = $autotags[string::slug($t)];
+					$m->tag = implode(",", array_unique($ar));
+
+					$ar = array(); // reset array $ar
+					foreach (explode(',',$m->tag) as $v) if(strlen($v)>2) $ar[] = string::slug($v);
+					if (count($ar)){
+						$link = $_link = implode("/", array_slice($ar, 0, 5));
+						$i = 0;
+						$check = 1;
+						while ($check = Model_Messages::fetch(array('link' => $link))){
+							$i++;
+							$link = "$_link/$i";
 						}
-						if (true!=Cache::get(md5(serialize((array)$in)))){
-							$m->save();
-							Cache::set(md5(serialize((array)$in)),true);
-							// Send Notification
-							$type = ($m->type=='status')?1:2;
-							foreach (explode(',',$m->tag) as $v) {
-								$where = implode(' OR ', Model_TagsGroup::get_query($v));
-								if ($a = Model_Group::fetch(array($where),1)){
-									$a = end($a);
-									$owner = new Model_User($a->by);
-									if ($owner->email){
-										Model_Notifications::sendmail($type, $owner->email, $m->uid, $a->name, $a->slug);
-									}
-								}
-							}
-						}
+						$m->link = $link;
+					}
+					if (true!=Cache::get(md5(serialize((array)$in)))){
+						$m->save();
+						Cache::set(md5(serialize((array)$in)),true);
 
-						$link = (isset($link))?$link:$id;
-						$url = ($m->type=='status')?"/c/$link.html":"/p/$link.html";
-						pingSE($url);
-
+						// Save Meta
 						$del = Model_MessagesMeta::fetch(array('msg_id' => $m->id));
 						if ($del) foreach ($del as $d) $d->delete();
 						foreach ($meta as $key => $value) if ($value&&$key) {
@@ -143,43 +128,34 @@ class Controller_Api_Message extends Controller
 							$mt->value  = $value;
 							$mt->save();
 						}
-
-						// Tags
-						$arr = array();
-						if (isset($meta["local"])){
-							if($ar = @explode(',',$meta["local"])) while (count($ar)>0) {
-								$arr[string::slug(implode(",", $ar))] = trim($ar[0]);
-								$ar = array_slice($ar, 1);
-							}
-						}
-						if(isset($arr)){
-							if(isset($tags)) foreach ($tags as $t) $arr[string::slug($t)] = $t;
-							$del = Model_TagsOccurrence::fetch(array('msg_id' => $m->id));
-							if ($del) foreach ($del as $d) $d->delete();
-							foreach ($arr as $key => $value) {
-								$tag_id = Model_Tags::get_or_insert($value,$key);
-								if ($tag_id){
-									$count = Model_TagsOccurrence::count(array('msg_id' => $m->id, 'tag_id' => $tag_id));
-									if ($count<1){
-										$tags_occurrence         = new Model_TagsOccurrence();
-										$tags_occurrence->msg_id = $m->id;
-										$tags_occurrence->tag_id = $tag_id;
-										$tags_occurrence->save();
-									}
+						Model_Messages::rebuild($m->id); // Build all tags
+						// Send Notification
+						$type = ($m->type=='status')?1:2;
+						foreach (explode(',',$m->tag) as $v) {
+							$where = implode(' OR ', Model_TagsGroup::get_query($v));
+							if ($a = Model_Group::fetch(array($where),1)){
+								$a = end($a);
+								$owner = new Model_User($a->by);
+								if ($owner->email){
+									Model_Notifications::sendmail($type, $owner->email, $m->uid, $a->name, $a->slug);
 								}
 							}
 						}
-						// end Tags
-						Response::json(array('message' => array('id' => (isset($m->link))?$m->link:$m->id)));
-					}else {
-						Response::json(array('flash' => 'Nội dung quá ngắn, ít nhất 3 ký tự'), 403);
+						$link = (isset($link))?$link:$m->id;
+						$url = ($m->type=='status')?"/c/$link.html":"/p/$link.html";
+						//pingSE($url); // Ping to Search Engine
+						Response::json(array('message' => array('id' => $link)));
 						exit;
 					}
-				}
-				else {
-					Response::json(array("flash" => "Lỗi: Đăng tin không thành công."), 403);
+					Response::json(array('flash' => 'Nội dung đã được đăng trước đó'), 403);
+					exit;
+				} else {
+					Response::json(array('flash' => 'Nội dung quá ngắn, ít nhất 3 ký tự'), 403);
 					exit;
 				}
+			} else {
+				Response::json(array("flash" => "Lỗi: Đăng tin không thành công."), 403);
+				exit;
 			}
 		}
 		exit;

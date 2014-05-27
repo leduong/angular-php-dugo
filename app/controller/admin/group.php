@@ -199,23 +199,7 @@ class Controller_Admin_Group extends Controller
 			$c->address   = post('address');
 			$c->long_name = post('other_name');
 			$c->save();
-
-			// Model_TagsAuto && Model_Tags
-			$tags = explode(",", implode(",", array($c->name,$c->long_name)));
-			foreach ($tags as $v) Model_Tags::get_or_insert($v,$c->id);
-
-			$del = Model_TagsAuto::fetch(array('group_id' => $c->id));
-			if ($del) foreach ($del as $d) $d->delete();
-			foreach ($tags as $v) Model_TagsAuto::get_or_insert($c->name,$c->id);
-
-			// Model_TagsGroup
-			$del = Model_TagsGroup::fetch(array('group_id' => $c->id));
-			if ($del) foreach ($del as $d) $d->delete();
-			$tag_id = 0;
-			$tag_id = Model_TagsGroup::get_or_insert($c->name,$tag_id,$c->id);
-			$tags = explode(",", $c->long_name);
-			if($tags)foreach ($tags as $v) if ($tag=trim($v)) Model_TagsGroup::get_or_insert($tag,$tag_id,$c->id);
-
+			Model_Group::rebuild($c->id);
 			$this->content->message = lang('success');
 			unset($_POST);
 		}
@@ -249,10 +233,9 @@ class Controller_Admin_Group extends Controller
 		{
 			$old_tags = $new_tags = array();
 			// old Tags and Name
-			$ar = explode(",", implode(",", array($c->name,$c->long_name,$c->tag)));
+			$ar = explode(",", implode(",", array($c->name,$c->long_name)));
 			foreach (array_unique($ar) as $a) if ($b=trim($a)) $old_tags[] = $b;
 			$old_name = $c->name;
-			$old_tagsname = explode(",", implode(",", array($c->name,$c->long_name)));
 			$where    = implode(' OR ', Model_TagsGroup::get_query($old_name));
 
 			/*if ($found = Model_TagsAuto::count(array($where))){
@@ -277,26 +260,10 @@ class Controller_Admin_Group extends Controller
 			// $c->tag = implode(",", $x); //Khong save tag edit
 			// Save
 			$c->save();
-
-			// Model_TagsAuto && Model_Tags
-			$tags = explode(",", implode(",", array($c->name,$c->long_name)));
-			foreach ($tags as $v) Model_Tags::get_or_insert($v);
-
-			$del = Model_TagsAuto::fetch(array('group_id' => $c->id));
-			if ($del) foreach ($del as $d) $d->delete();
-			foreach ($tags as $v) Model_TagsAuto::get_or_insert($c->name,$c->id);
-
-			// Model_TagsGroup
-			$del = Model_TagsGroup::fetch(array('group_id' => $c->id));
-			if ($del) foreach ($del as $d) $d->delete();
-			$tag_id = 0;
-			$tag_id = Model_TagsGroup::get_or_insert($c->name,$tag_id,$c->id);
-			$tags = explode(",", $c->long_name);
-			if($tags)foreach ($tags as $v) if ($tag=trim($v)) Model_TagsGroup::get_or_insert($tag,$tag_id,$c->id);
-
+			Model_Group::rebuild($c->id);
 
 			// Update
-			$ar = explode(",", implode(",", array($c->name,$c->long_name,$c->tag)));
+			$ar = explode(",", implode(",", array($c->name,$c->long_name)));
 			foreach (array_unique($ar) as $a) if ($b=trim($a)) $new_tags[] = $b;
 
 			if (array_diff($new_tags, $old_tags)){
@@ -311,8 +278,8 @@ class Controller_Admin_Group extends Controller
 				if ($fetch = $db->fetch($query)) foreach ($fetch as $o) {
 					$m = new Model_Messages($o->id);
 					if (isset($m->id)) {
-						$m_diff = array_diff(@explode(",", $m->tag),$old_tags);
-						$m->tag = implode(",", array_unique(array_merge($new_tags,$m_diff)));
+						$diff = array_diff(@explode(",", $m->tag),$old_tags);
+						$m->tag = implode(",", array_unique(array_merge($new_tags,$diff)));
 						$m->save();
 						$mt = Model_MessagesMeta::fetch(array('msg_id' => $m->id, 'type' => "local"),1);
 						if ($mt){
@@ -329,8 +296,7 @@ class Controller_Admin_Group extends Controller
 				}
 			}
 
-			$new_tagsname = explode(",", implode(",", array($c->name,$c->long_name)));
-			if ($diff = array_diff($old_tagsname, $new_tagsname)){
+			if ($diff = array_diff($old_tags, $new_tags)){
 				$x = array();
 				foreach ($diff as $a) if ($b=string::slug($a)) $x[] = "slug = '$b'";
 				$where = implode(" OR ", $x);

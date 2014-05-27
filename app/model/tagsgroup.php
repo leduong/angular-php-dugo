@@ -48,9 +48,9 @@ class Model_TagsGroup extends APCORM
 		'tags'       => 'Model_TagsGroup'
 		); // Relations Ship
 	//public static $h = array(); // Relations Ship
-	public static function get_or_insert($name, $tag_id=0, $group_id=0, $peer=1){
+	public static function get_or_insert($name, $tag_id=0, $group_id=0, $peer=1, $slug=NULL){
 		$name = trim($name);
-		$slug = string::slug($name);
+		$slug = (is_null($slug))?string::slug($name):$slug;
 		if ($name&&$slug){
 			$t           = new Model_TagsGroup();
 			$t->name     = $name;
@@ -74,6 +74,13 @@ class Model_TagsGroup extends APCORM
 		$ar = self::get_all($name);
 		$arr = array();
 		if ($ar) foreach ($ar as $k => $v) $arr[]  = $v;
+		return $arr;
+	}
+
+	public static function get_slug($name){
+		$ar = self::get_all($name);
+		$arr = array();
+		if ($ar) foreach ($ar as $k => $v) $arr[]  = $k;
 		return $arr;
 	}
 

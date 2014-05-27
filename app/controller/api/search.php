@@ -262,6 +262,7 @@ class Controller_Api_Search extends Controller
 						$topic[] = array('text' => $f->name, 'slug' => $f->slug);
 					}
 				}*/
+				$where = implode(' OR ', Model_TagsGroup::get_query($keyword));
 				if ($ar = Model_City::fetch(array("slug LIKE '%".$keyword."%'"))){
 					foreach ($ar as $a) $city[] = array('text' => $a->name, 'slug' => $a->slug);
 				}
@@ -269,7 +270,7 @@ class Controller_Api_Search extends Controller
 					foreach ($ar as $a) $district[] = array('text' => $a->name, 'slug' => $a->slug);
 				}
 				if ($ar = Model_Zipcode::fetch(array("slug LIKE '%".$keyword."%'"),10)){
-					foreach ($ar as $a) $zipcode[] = array('text' => $a->name, 'slug' => $a->slug);
+					foreach ($ar as $a) $zipcode[] = array('text' => implode(", ", array_slice(explode(", ", $a->full_name),0,2)), 'slug' => $a->slug);
 				}
 				if ($ar = Model_TagsAuto::fetch(array("slug LIKE '%".$keyword."%'"))){
 					foreach ($ar as $a) {
@@ -440,10 +441,9 @@ class Controller_Api_Search extends Controller
 								FROM tags, tags_occurrence, messages
 								WHERE messages.type = '%s' AND
 								messages.id = tags_occurrence.msg_id AND
-								tags.id = tags_occurrence.tag_id AND
-								($where)";
-						$status             = $db->column(sprintf($_q,'status'));
-						$realestate         = $db->column(sprintf($_q,'realestate'));
+								tags.id = tags_occurrence.tag_id AND tags.slug = '%s'";
+						$status     = $db->column(sprintf($_q,'status',$slug));
+						$realestate = $db->column(sprintf($_q,'realestate',$slug));
 						//die(var_dump($realestate));
 						Cache::set('realestate.'.$slug,$realestate);
 						Cache::set('status.'.$slug,$status);
@@ -534,11 +534,12 @@ class Controller_Api_Search extends Controller
 	{
 		$ar = array();
 		if($keyword!=NULL){
-			$fetch = Cache::get("keyword.".md5(string::slug($keyword)));
+			$slug = string::slug($keyword);
+			$fetch = Cache::get("keyword.".md5($slug));
 			if (!$fetch) {
 				$db = registry('db');
-				$all = Model_TagsGroup::get_query($keyword);
-				$where =  implode(' OR ', $all);
+				//$all = Model_TagsGroup::get_query($keyword);
+				$where = "slug = '$slug'";// implode(' OR ', $all);
 				$query = "SELECT messages.id
 				   FROM messages, tags, tags_occurrence
 				   WHERE messages.id = tags_occurrence.msg_id AND
@@ -548,7 +549,7 @@ class Controller_Api_Search extends Controller
 				   ORDER BY messages.time DESC
 				   LIMIT 1000";
 				$fetch = $db->fetch($query);
-				Cache::set("keyword.".md5(string::slug($keyword)),$fetch,600);
+				Cache::set("keyword.".md5($slug),$fetch,600);
 			}
 			foreach ($fetch as $a) $ar[] = $a->id;
 		}

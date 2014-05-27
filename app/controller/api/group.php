@@ -88,14 +88,7 @@ class Controller_Api_Group extends Controller
 					$g->subdomain   = isset($in->subdomain)?$in->subdomain:NULL;
 					$g->description = isset($in->description)?$in->description:NULL;
 					if($g->save()){
-						// Model_TagsAuto
-						Model_TagsAuto::get_or_insert($g->name,$g->id);
-						foreach ($tags as $v) Model_Tags::get_or_insert($v,$g->id);
-						// Model_TagsGroup
-						$tag_id = 0;
-						$tag_id = Model_TagsGroup::get_or_insert($g->name,$tag_id,$g->id);
-						$tags = explode(",", $g->long_name);
-						if($tags)foreach ($tags as $v) if ($tag=trim($v)) Model_TagsGroup::get_or_insert($tag,$tag_id,$g->id);
+						Model_Group::rebuild($g->id);
 						// Out
 						$group = $g->to_array();
 						$group['map'] = explode(",",$group["map"]);

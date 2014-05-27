@@ -79,11 +79,12 @@ class Model_Messages extends APCORM
 					$ar = array_slice($ar, 1);
 				}
 			}
+			foreach (@explode(',',$m->tag) as $t) $arr = array_merge($arr, Model_TagsGroup::get_all($t));
+			//echo var_dump($arr);
 			if(isset($arr)){
-				if($tags = @explode(',',$m->tag)) foreach ($tags as $t) $arr[string::slug($t)] = trim($t);
 				$del = Model_TagsOccurrence::fetch(array('msg_id' => $m->id));
 				if ($del) foreach ($del as $d) $d->delete();
-				foreach ($arr as $key => $value) {
+				foreach (array_unique($arr) as $key => $value) {
 					$tag_id = Model_Tags::get_or_insert($value,$key);
 					if ($tag_id){
 						$count = Model_TagsOccurrence::count(array('msg_id' => $m->id, 'tag_id' => $tag_id));
