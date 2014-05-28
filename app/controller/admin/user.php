@@ -32,6 +32,52 @@ class Controller_Admin_User extends Controller
 		}
 		redirect(HTTP_SERVER.'/admin/user/lists');
 	}
+	public function vip()
+	{
+		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
+		$ar = array();
+		$ar[] = array(
+			"ID",
+			"Name",
+			"Email",
+			"Phone",
+			"Dia danh",
+			"Rao dang",
+			"Trao doi"
+			);
+		$users = array();
+		$week = Model_Messages::fetch(array('YEARWEEK(date) = YEARWEEK(NOW())'));
+		if ($week) foreach ($week as $a) $users[] = $a->uid;
+		if ($users) foreach (array_unique($users) as $u) {
+			$a = new Model_User($u);
+			if (isset($a->idu)){
+				$ar[] = array(
+					$a->idu,
+					$a->first_name,
+					$a->email,
+					$a->phone,
+					Model_Group::count(array('by' => $a->idu)),
+					Model_Messages::count(array('uid' => $a->idu, 'YEARWEEK(date) = YEARWEEK(NOW())', 'type' => 'realestate')),
+					Model_Messages::count(array('uid' => $a->idu, 'YEARWEEK(date) = YEARWEEK(NOW())', 'type' => 'status'))
+				);
+			}
+		}
+
+		$now = date("D, d M Y H:i:s");
+		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+		header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+		header("Last-Modified: {$now} GMT");
+
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
+
+		// disposition / encoding on response body
+		header("Content-Disposition: attachment;filename=vip.csv");
+		header("Content-Transfer-Encoding: binary");
+		echo array2csv($ar);
+		die();
+	}
 	public function verified()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
@@ -222,7 +268,7 @@ class Controller_Admin_User extends Controller
 			$u->username   = string::slug(post('username'));
 			$u->last_name  = post('last_name');
 			$u->first_name = post('first_name');
-			if (!empty(post('password'))) {$u->password = md5(post('password'));};
+			if (!post('password')) {$u->password = md5(post('password'));}
 
 			$u->save();
 
