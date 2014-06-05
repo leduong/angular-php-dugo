@@ -5,6 +5,65 @@ class Controller_Admin_Group extends Controller
 	{
 		redirect(HTTP_SERVER.'/admin/group/lists');
 	}
+	public function active()
+	{
+		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
+		$ar = array();
+		$ar[] = array(
+			"ID",
+			"Name",
+			"Email",
+			"Phone",
+			"Dia danh",
+			"Rao dang",
+			"Trao doi"
+			);
+		if ($groups = Model_Group::fetch()) foreach ($groups as $g) {
+			$slug = $g->slug;
+			$realestate = Cache::get('realestate.'.$slug);
+			$status     = Cache::get('status.'.$slug);
+			if(!$realestate||!$status){ // First count
+				$db = registry('db');
+				$_q = "SELECT COUNT(DISTINCT messages.id)
+						FROM tags, tags_occurrence, messages
+						WHERE messages.type = '%s' AND
+						messages.id = tags_occurrence.msg_id AND
+						tags.id = tags_occurrence.tag_id AND tags.slug = '%s'";
+				$status     = $db->column(sprintf($_q,'status',$slug));
+				$realestate = $db->column(sprintf($_q,'realestate',$slug));
+				//die(var_dump($realestate));
+				Cache::set('realestate.'.$slug,$realestate);
+				Cache::set('status.'.$slug,$status);
+			}
+			$a = new Model_User($g->by);
+			if (isset($a->idu)){
+				$ar[] = array(
+					$a->idu,
+					$a->first_name,
+					$a->email,
+					$a->phone,
+					$g->name,
+					$realestate,
+					$status
+					);
+			}
+		}
+
+		$now = date("D, d M Y H:i:s");
+		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+		header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+		header("Last-Modified: {$now} GMT");
+
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
+
+		// disposition / encoding on response body
+		header("Content-Disposition: attachment;filename=groups.csv");
+		header("Content-Transfer-Encoding: binary");
+		echo array2csv($ar);
+		die();
+	}
 	public function ajax(){
 		$sSearch = string::slug(get('sSearch'));
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');

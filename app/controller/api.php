@@ -78,11 +78,12 @@ class Controller_Api extends Controller
 						$fetch = Model_Group::fetch(array("slug LIKE '%".string::slug($input->address)."%'"),10);
 						if ($fetch) foreach ($fetch as $f) {
 							$array[] = array(
-								'local' => trim($f->local),
-								'tag' => explode(",",$f->name.",".$f->short_name.",".$f->long_name.",".$f->tag),
+								'local'     => trim($f->local),
+								'tag'       => $f->name,
 								'long_name' => trim($f->name.", ".$f->address.", ".$f->local),
-								'map' => explode(",",$f->map),
-								'check' => TRUE,
+								'address'   => $f->address,
+								'map'       => explode(",",$f->map),
+								'check'     => TRUE
 								);
 						}
 					}
@@ -97,11 +98,12 @@ class Controller_Api extends Controller
 						$zp = new Model_Zipcode($v->id);
 						$district_id = new Model_District($zp->district_id);
 						$array[] = array(
-							'tag' => array(),
-							'local' => trim($zp->full_name),
+							'tag'       => array(),
+							'local'     => trim($zp->full_name),
 							'long_name' => trim($zp->full_name),
-							'map' => explode(",", $district_id->map),
-							'check' => FALSE,
+							'address'   => '',
+							'map'       => explode(",", $district_id->map),
+							'check'     => FALSE
 							);
 					}
 					Response::json(array('results' => $array));

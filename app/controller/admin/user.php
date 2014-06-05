@@ -1,18 +1,4 @@
 <?php
-function array2csv(array &$array)
-{
-   if (count($array) == 0) {
-     return null;
-   }
-   ob_start();
-   $df = fopen("php://output", 'w');
-   fputcsv($df, array_keys(reset($array)));
-   foreach ($array as $row) {
-      fputcsv($df, $row);
-   }
-   fclose($df);
-   return ob_get_clean();
-}
 
 class Controller_Admin_User extends Controller
 {
@@ -32,6 +18,7 @@ class Controller_Admin_User extends Controller
 		}
 		redirect(HTTP_SERVER.'/admin/user/lists');
 	}
+
 	public function vip()
 	{
 		if (false==controller_admin_index::checklogin()) redirect(HTTP_SERVER.'/admin/login');
@@ -107,19 +94,19 @@ class Controller_Admin_User extends Controller
 		}
 
 		$now = date("D, d M Y H:i:s");
-	    header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-	    header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
-	    header("Last-Modified: {$now} GMT");
+		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+		header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+		header("Last-Modified: {$now} GMT");
 
-	    header("Content-Type: application/force-download");
-	    header("Content-Type: application/octet-stream");
-	    header("Content-Type: application/download");
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
 
-	    // disposition / encoding on response body
-	    header("Content-Disposition: attachment;filename=verified.csv");
-	    header("Content-Transfer-Encoding: binary");
-	    echo array2csv($ar);
-	    die();
+		// disposition / encoding on response body
+		header("Content-Disposition: attachment;filename=verified.csv");
+		header("Content-Transfer-Encoding: binary");
+		echo array2csv($ar);
+		die();
 	}
 	public function unverified()
 	{
@@ -150,19 +137,19 @@ class Controller_Admin_User extends Controller
 		}
 
 		$now = date("D, d M Y H:i:s");
-	    header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-	    header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
-	    header("Last-Modified: {$now} GMT");
+		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+		header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+		header("Last-Modified: {$now} GMT");
 
-	    header("Content-Type: application/force-download");
-	    header("Content-Type: application/octet-stream");
-	    header("Content-Type: application/download");
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
 
-	    // disposition / encoding on response body
-	    header("Content-Disposition: attachment;filename=unverified.csv");
-	    header("Content-Transfer-Encoding: binary");
-	    echo array2csv($ar);
-	    die();
+		// disposition / encoding on response body
+		header("Content-Disposition: attachment;filename=unverified.csv");
+		header("Content-Transfer-Encoding: binary");
+		echo array2csv($ar);
+		die();
 	}
 	public function lists()
 	{

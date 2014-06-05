@@ -188,27 +188,36 @@ class Controller_Api_Message extends Controller
 							$local[string::slug(implode(",", $ar))] = trim($ar[0]);
 							$ar = array_slice($ar, 1);
 						}
-						$meta["local"] = $local;
 					}
 					$_tags = array();
 					if($ar = @explode(',',$m->tag)) foreach ($ar as $a) if($x=trim($a)){
-						if ($b = Model_Group::fetch(array('slug' => string::slug($x)),1)){
-							$meta["local"][string::slug($x)] = $x;
+						$slug = string::slug($x);
+						if ($b = Model_Group::fetch(array('slug' => $slug),1)){
+							$local[$slug] = $x;
 							$g = explode(",",$b[0]->name.",".$b[0]->long_name);
-							foreach ($g as $v) if ($y=trim($v)) $group[]=$y;
+							foreach ($g as $v) if ($y=trim($v)) $group[string::slug($y)]=$y;
 						}
-						elseif ($b = Model_City::fetch(array('slug' => string::slug($x)),1)){
-							$meta["local"][string::slug($x)] = $x;
+						elseif (Model_City::count(array('slug' => $slug))){
+							$local[$slug] = $x;
 						}
 						else {
-							$_tags = array_merge($_tags,Model_TagsGroup::get_array($x));
+							$_tags = array_merge($_tags,Model_TagsGroup::get_all($x));
 						}
 					}
-					$meta["local"] = array_unique($meta["local"]);
+
 					//die(dump($_tags));
-
-					if ($ar = array_diff(array_unique($_tags),$group)) foreach ($ar as $a) $tags[string::slug($a)] = trim($a);
-
+					if ($ar = array_diff(array_unique($_tags),$group)) foreach ($ar as $k => $v) {
+						if (Model_City::count(array('slug' => $k))){
+							$local[$k] = $v;
+						}
+						elseif (Model_District::count(array('slug' => $k))){
+							$local[$k] = $v;
+						}
+						elseif (Model_Zipcode::count(array('slug' => $k))){
+							$local[$k] = $v;
+						} else $tags[$k] = $v;
+					}
+					$meta["local"] = array_unique($local);
 					//
 					$where   = array('msg_id' => $m->id);
 					$share   = Model_Share::count($where);
