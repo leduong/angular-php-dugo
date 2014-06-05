@@ -4,5 +4,6 @@ app/themes/nhadat/*
 app/app.php
 app/config.php
 app/init.php
+app/fix.php
 index.html
 uploads
