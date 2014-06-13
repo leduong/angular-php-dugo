@@ -428,7 +428,7 @@ class Controller_Api_Search extends Controller
 				}
 				// Get first Tag
 				$slug  = string::slug($keywords[0]);
-				$all   = Model_TagsGroup::get_query($slug);
+				$all   = Model_TagsGroup::get_query($slug,1);
 				$where = implode(' OR ', $all);
 
 				if ($fetch = Model_Tags::fetch(array('slug' => $slug),1)) {

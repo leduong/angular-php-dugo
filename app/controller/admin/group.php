@@ -137,15 +137,18 @@ class Controller_Admin_Group extends Controller
 				$ar = explode(",", implode(",", array($new->name,$new->long_name,$new->tag)));
 				foreach (array_unique($ar) as $a) if ($b=trim($a)) $new_tags[] = $b;
 
+				// Log change name
+				@log_message("merge: ".implode(",", $old_tags)."-> ".implode(",", $new_tags));
+
 				$db = registry('db');
-				$where = implode(' OR ', Model_TagsGroup::get_query($group->name));
-				$query = "SELECT messages.id,
-						   COUNT(*) AS occurrences
+				$where = implode(' OR ', Model_TagsGroup::get_query($group->name,1));
+				$query = "SELECT messages.id
 						   FROM messages, tags, tags_occurrence
 						   WHERE messages.id = tags_occurrence.msg_id AND
 						   tags.id = tags_occurrence.tag_id AND
 						   ($where)
 						   GROUP BY messages.id";
+				@log_message("query: ".$query);
 				if ($fetch = $db->fetch($query)) foreach ($fetch as $o) {
 					$m = new Model_Messages($o->id);
 					if (isset($m->id)) {
@@ -295,7 +298,7 @@ class Controller_Admin_Group extends Controller
 			$ar = explode(",", implode(",", array($c->name,$c->long_name)));
 			foreach (array_unique($ar) as $a) if ($b=trim($a)) $old_tags[] = $b;
 			$old_name = $c->name;
-			$where    = implode(' OR ', Model_TagsGroup::get_query($old_name));
+			$where    = implode(' OR ', Model_TagsGroup::get_query($old_name,1));
 
 			/*if ($found = Model_TagsAuto::count(array($where))){
 				Response::json(array('flash' => "Tên \"$v\" đã được sử dụng"),403);
@@ -324,16 +327,17 @@ class Controller_Admin_Group extends Controller
 			// Update
 			$ar = explode(",", implode(",", array($c->name,$c->long_name)));
 			foreach (array_unique($ar) as $a) if ($b=trim($a)) $new_tags[] = $b;
-
+			// Log change name
+			@log_message("update: ".implode(",", $old_tags)."-> ".implode(",", $new_tags));
 			if (array_diff($new_tags, $old_tags)){
 				$db = registry('db');
-				$query = "SELECT messages.id,
-						   COUNT(*) AS occurrences
+				$query = "SELECT messages.id
 						   FROM messages, tags, tags_occurrence
 						   WHERE messages.id = tags_occurrence.msg_id AND
 						   tags.id = tags_occurrence.tag_id AND
 						   ($where)
 						   GROUP BY messages.id";
+				@log_message("query: ".$query);
 				if ($fetch = $db->fetch($query)) foreach ($fetch as $o) {
 					$m = new Model_Messages($o->id);
 					if (isset($m->id)) {

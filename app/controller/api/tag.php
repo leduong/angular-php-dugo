@@ -38,7 +38,7 @@ class Controller_Api_Tag extends Controller
 				$array = array();
 				if(isset($in->slug)) {
 					$slug  = str_replace('.html','',$in->slug);
-					$all   = Model_TagsGroup::get_query($slug);
+					$all   = Model_TagsGroup::get_query($slug,1);
 					$where = implode(' OR ', $all);
 
 					if ($fetch = Model_Tags::fetch(array('slug' => $slug),1)) {
@@ -65,7 +65,7 @@ class Controller_Api_Tag extends Controller
 							$array['followed'] = ($follow)?1:0;
 						} else $array['followed'] = 0;
 
-						$all = Model_TagsGroup::get_query($slug);
+						$all = Model_TagsGroup::get_query($slug,1);
 						$where = implode(' OR ', $all);
 						//die($where);
 						if($fetch = Model_Group::fetch(array($where),1)){
@@ -113,7 +113,7 @@ class Controller_Api_Tag extends Controller
 							$array['type'] = "city";
 							$array['name'] = $a->full_name;
 						} else {
-							$same = Model_TagsGroup::get_array($slug);
+							$same = Model_TagsGroup::get_array($slug,1);
 							if (count($same)>1) $array['long_name'] = implode(", ", $same);
 							$array['type'] = "topic";
 						}

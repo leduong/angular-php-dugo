@@ -63,28 +63,28 @@ class Model_TagsGroup extends APCORM
 		}
 	}
 
-	public static function get_query($name){
-		$ar = self::get_all($name);
+	public static function get_query($name, $peer = 0){
+		$ar = self::get_all($name, $peer);
 		$arr = array();
 		if ($ar) foreach ($ar as $k => $v) $arr[]  = "`slug` = '".$k."'";
 		return $arr;
 	}
 
-	public static function get_array($name){
+	public static function get_array($name, $peer = 0){
 		$ar = self::get_all($name);
 		$arr = array();
 		if ($ar) foreach ($ar as $k => $v) $arr[]  = $v;
 		return $arr;
 	}
 
-	public static function get_slug($name){
-		$ar = self::get_all($name);
+	public static function get_slug($name, $peer = 0){
+		$ar = self::get_all($name, $peer);
 		$arr = array();
 		if ($ar) foreach ($ar as $k => $v) $arr[]  = $k;
 		return $arr;
 	}
 
-	public static function get_all($name){
+	public static function get_all($name, $peer = 0){
 		$slug  = string::slug($name);
 		$fetch = Model_TagsGroup::fetch(array('slug' => $slug));
 		if ($fetch){
@@ -94,14 +94,14 @@ class Model_TagsGroup extends APCORM
 					$t->load();
 					$tags = $t->tags();
 					$ar[$t->slug] = $t->name;
-					if($tags)foreach ($tags as $a) if($a->slug&&$a->name) $ar[$a->slug] = $a->name;
+					if($tags)foreach ($tags as $a) if($a->slug&&$a->name&&($a->peer>=$peer)) $ar[$a->slug] = $a->name;
 				} elseif ($t->peer==1) {
 					$g = new Model_TagsGroup($t->tag_id);
 					if (isset($g->id)){
 						$g->load();
 						$tags = $g->tags();
 						$ar[$g->slug] = $g->name;
-						if($tags)foreach ($tags as $a) if($a->slug&&$a->name) $ar[$a->slug] = $a->name;
+						if($tags)foreach ($tags as $a) if($a->slug&&$a->name&&($a->peer>=$peer)) $ar[$a->slug] = $a->name;
 					}
 				} else {
 					$ar[$t->slug] = $t->name;
